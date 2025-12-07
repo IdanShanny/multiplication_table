@@ -137,15 +137,15 @@ export const PracticeScreen: React.FC<Props> = ({
   };
 
   if (!currentExercise) {
-    return (
-      <LinearGradient colors={['#667eea', '#764ba2']} style={styles.container}>
-        <Text style={styles.loadingText}>טוען...</Text>
-      </LinearGradient>
-    );
+  return (
+    <LinearGradient colors={['#e74c3c', '#c0392b']} style={styles.container}>
+      <Text style={styles.loadingText}>טוען...</Text>
+    </LinearGradient>
+  );
   }
 
   return (
-    <LinearGradient colors={['#667eea', '#764ba2']} style={styles.container}>
+    <LinearGradient colors={['#e74c3c', '#c0392b']} style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
@@ -203,7 +203,7 @@ export const PracticeScreen: React.FC<Props> = ({
             disabled={showingFeedback || !answer.trim()}
           >
             <LinearGradient
-              colors={showingFeedback ? ['#ccc', '#aaa'] : ['#00c6fb', '#005bea']}
+              colors={showingFeedback ? ['#ccc', '#aaa'] : ['#e74c3c', '#c0392b']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.submitButtonGradient}
@@ -321,12 +321,12 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 3,
-    borderColor: '#667eea',
+    borderColor: '#e74c3c',
     borderRadius: 16,
     padding: 20,
     fontSize: 32,
     fontWeight: 'bold',
-    backgroundColor: '#f8f8ff',
+    backgroundColor: '#fff5f5',
     color: '#333',
   },
   submitButton: {
@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
   },
   continueButton: {
     marginTop: 20,
-    backgroundColor: '#667eea',
+    backgroundColor: '#e74c3c',
     paddingVertical: 14,
     paddingHorizontal: 32,
     borderRadius: 25,

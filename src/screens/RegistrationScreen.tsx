@@ -34,7 +34,7 @@ export const RegistrationScreen: React.FC<Props> = ({ onRegister }) => {
 
   return (
     <LinearGradient
-      colors={['#667eea', '#764ba2']}
+      colors={['#e74c3c', '#c0392b']}
       style={styles.container}
     >
       <KeyboardAvoidingView
@@ -111,7 +111,7 @@ export const RegistrationScreen: React.FC<Props> = ({ onRegister }) => {
 
           <TouchableOpacity style={styles.button} onPress={handleSubmit}>
             <LinearGradient
-              colors={['#f093fb', '#f5576c']}
+              colors={['#e74c3c', '#c0392b']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.buttonGradient}
@@ -195,8 +195,8 @@ const styles = StyleSheet.create({
     width: '45%',
   },
   genderButtonSelected: {
-    borderColor: '#667eea',
-    backgroundColor: '#f0f4ff',
+    borderColor: '#e74c3c',
+    backgroundColor: '#fff5f5',
   },
   genderEmoji: {
     fontSize: 48,
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   genderTextSelected: {
-    color: '#667eea',
+    color: '#e74c3c',
   },
   error: {
     color: '#f5576c',

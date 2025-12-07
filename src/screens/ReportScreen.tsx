@@ -122,7 +122,7 @@ export const ReportScreen: React.FC<Props> = ({ user, appData, onBack }) => {
   };
 
   return (
-    <LinearGradient colors={['#667eea', '#764ba2']} style={styles.container}>
+    <LinearGradient colors={['#e74c3c', '#c0392b']} style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
           <Text style={styles.backButtonText}>← חזרה</Text>
@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   exerciseItem: {
-    backgroundColor: '#f0f4ff',
+    backgroundColor: '#fff5f5',
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
