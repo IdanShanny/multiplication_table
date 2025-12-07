@@ -251,7 +251,7 @@ export const PracticeScreen: React.FC<Props> = ({
             )}
             {/* Continue button */}
             <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
-              <Text style={styles.continueButtonText}>המשך ➜</Text>
+              <Text style={styles.continueButtonText}>נמשיך ←</Text>
             </TouchableOpacity>
           </Animated.View>
         )}

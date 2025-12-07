@@ -9,6 +9,7 @@ const getKnow = (gender: Gender): string => gender === 'male' ? 'יודע' : 'י
 const getImprove = (gender: Gender): string => gender === 'male' ? 'משתפר' : 'משתפרת';
 const getChampion = (gender: Gender): string => gender === 'male' ? 'אלוף' : 'אלופה';
 const getAdvancing = (gender: Gender): string => gender === 'male' ? 'מתקדם' : 'מתקדמת';
+const getLearning = (gender: Gender): string => gender === 'male' ? 'לומד' : 'לומדת';
 
 export const getCorrectMessages = (name: string, gender: Gender): string[] => {
   const suffix = getSuffix(gender);
@@ -19,6 +20,7 @@ export const getCorrectMessages = (name: string, gender: Gender): string[] => {
   const improve = getImprove(gender);
   const champion = getChampion(gender);
   const advancing = getAdvancing(gender);
+  const learning = getLearning(gender);
 
   return [
     // Short messages
@@ -39,7 +41,7 @@ export const getCorrectMessages = (name: string, gender: Gender): string[] => {
     
     // Longer encouraging messages
     `כל הכבוד, ${name}! ${you} ${improve} כל הזמן!`,
-    `יפה מאוד, ${name}! לאט ובטוח ${you} לומד${suffix} את לוח הכפל!`,
+    `יפה מאוד, ${name}! לאט ובטוח ${you} ${learning} את לוח הכפל!`,
     `${great}, ${name}! התרגול משתלם!`,
     `${name}, ${you} עושה עבודה נהדרת! ${cont} ככה!`,
     `בול! ${name}, ${you} ממש ${advancing}!`,
