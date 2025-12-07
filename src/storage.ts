@@ -41,19 +41,86 @@ const getDefaultAppData = (): AppData => ({
   showWrongExerciseNext: false,
 });
 
+// Migrate and validate stored data to ensure compatibility with current version
+const migrateAppData = (parsed: any): AppData => {
+  const defaultData = getDefaultAppData();
+  
+  // Start with default data and merge in valid stored data
+  const migrated: AppData = {
+    user: null,
+    exercises: defaultData.exercises,
+    results: [],
+    lastWrongExercise: null,
+    showWrongExerciseNext: false,
+  };
+  
+  // Migrate user data
+  if (parsed.user && typeof parsed.user === 'object') {
+    if (parsed.user.name && parsed.user.gender) {
+      migrated.user = {
+        name: String(parsed.user.name),
+        gender: parsed.user.gender === 'female' ? 'female' : 'male',
+      };
+    }
+  }
+  
+  // Migrate exercises - preserve groups from stored data
+  if (parsed.exercises && typeof parsed.exercises === 'object') {
+    for (const key of Object.keys(migrated.exercises)) {
+      if (parsed.exercises[key] && typeof parsed.exercises[key].group === 'number') {
+        const group = parsed.exercises[key].group;
+        if (group >= 1 && group <= 4) {
+          migrated.exercises[key].group = group as 1 | 2 | 3 | 4;
+        }
+      }
+    }
+  }
+  
+  // Migrate results - validate each result
+  if (Array.isArray(parsed.results)) {
+    migrated.results = parsed.results.filter((r: any) => 
+      r && typeof r === 'object' &&
+      typeof r.a === 'number' &&
+      typeof r.b === 'number' &&
+      typeof r.isCorrect === 'boolean'
+    );
+  }
+  
+  // Migrate lastWrongExercise
+  if (parsed.lastWrongExercise && typeof parsed.lastWrongExercise === 'object') {
+    if (typeof parsed.lastWrongExercise.a === 'number' && typeof parsed.lastWrongExercise.b === 'number') {
+      migrated.lastWrongExercise = {
+        a: parsed.lastWrongExercise.a,
+        b: parsed.lastWrongExercise.b,
+      };
+    }
+  }
+  
+  // Migrate showWrongExerciseNext
+  if (typeof parsed.showWrongExerciseNext === 'boolean') {
+    migrated.showWrongExerciseNext = parsed.showWrongExerciseNext;
+  }
+  
+  return migrated;
+};
+
 export const loadAppData = async (): Promise<AppData> => {
   try {
     const data = await AsyncStorage.getItem(STORAGE_KEY);
     if (data) {
-      const parsed = JSON.parse(data) as AppData;
-      // Ensure exercises are initialized if missing
-      if (!parsed.exercises || Object.keys(parsed.exercises).length === 0) {
-        parsed.exercises = initializeExercises();
-      }
-      return parsed;
+      const parsed = JSON.parse(data);
+      // Migrate and validate the data
+      const migrated = migrateAppData(parsed);
+      return migrated;
     }
   } catch (error) {
     console.error('Error loading data:', error);
+    // If there's an error, clear corrupted data and start fresh
+    try {
+      await AsyncStorage.removeItem(STORAGE_KEY);
+    } catch (clearError) {
+      console.error('Error clearing corrupted data:', clearError);
+    }
   }
   return getDefaultAppData();
 };
