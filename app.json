@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "לוח הכפל",
+    "slug": "multiplication-table",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.multiplication.table"
+    },
+    "android": {
+      "package": "com.multiplication.table"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "9c0f8dd1-6e5b-4dce-86ec-556dccc06770"
+      }
+    }
+  }
+}
