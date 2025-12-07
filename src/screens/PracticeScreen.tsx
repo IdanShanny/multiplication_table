@@ -37,52 +37,96 @@ export const PracticeScreen: React.FC<Props> = ({
   const feedbackAnim = useRef(new Animated.Value(0)).current;
   const exerciseAnim = useRef(new Animated.Value(1)).current;
   const inputRef = useRef<TextInput>(null);
+  const isFirstLoad = useRef(true);
 
   useEffect(() => {
-    selectNewExercise();
+    loadFirstExercise();
   }, []);
 
-  const selectNewExercise = async () => {
-    const freshData = await loadAppData();
-    const exercise = selectNextExercise(freshData, currentExercise || undefined);
-    
-    // Reset state immediately so input becomes editable
-    setShowingFeedback(false);
-    setFeedback(null);
-    
-    // Animate out old exercise
-    Animated.timing(exerciseAnim, {
-      toValue: 0,
-      duration: 150,
-      useNativeDriver: true,
-    }).start(() => {
+  // Load first exercise immediately without animation
+  const loadFirstExercise = async () => {
+    try {
+      const freshData = await loadAppData();
+      const exercise = selectNextExercise(freshData, undefined);
+      
+      // Set exercise immediately on first load (no animation)
       setCurrentExercise(exercise);
       setStartTime(Date.now());
-      setAnswer('');
+      isFirstLoad.current = false;
       
-      // Animate in new exercise
+      // Update the flag for showing wrong exercise
+      if (freshData.lastWrongExercise) {
+        if (freshData.showWrongExerciseNext) {
+          freshData.lastWrongExercise = null;
+          freshData.showWrongExerciseNext = false;
+        } else {
+          freshData.showWrongExerciseNext = true;
+        }
+        await saveAppData(freshData);
+      }
+      
+      onDataUpdate(freshData);
+    } catch (error) {
+      console.error('Error loading first exercise:', error);
+      // Fallback: create a simple exercise
+      setCurrentExercise({ a: 2, b: 3, group: 1 });
+      setStartTime(Date.now());
+    }
+  };
+
+  const selectNewExercise = async () => {
+    try {
+      const freshData = await loadAppData();
+      const exercise = selectNextExercise(freshData, currentExercise || undefined);
+      
+      // Reset state immediately so input becomes editable
+      setShowingFeedback(false);
+      setFeedback(null);
+      
+      // Animate out old exercise
       Animated.timing(exerciseAnim, {
-        toValue: 1,
-        duration: 200,
+        toValue: 0,
+        duration: 150,
         useNativeDriver: true,
       }).start(() => {
-        // Focus input after animation completes
-        inputRef.current?.focus();
+        setCurrentExercise(exercise);
+        setStartTime(Date.now());
+        setAnswer('');
+        
+        // Animate in new exercise
+        Animated.timing(exerciseAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }).start(() => {
+          // Focus input after animation completes
+          inputRef.current?.focus();
+        });
       });
-    });
-    
-    // Update the flag for showing wrong exercise
-    if (freshData.lastWrongExercise) {
-      if (freshData.showWrongExerciseNext) {
-        freshData.lastWrongExercise = null;
-        freshData.showWrongExerciseNext = false;
-      } else {
-        freshData.showWrongExerciseNext = true;
+      
+      // Update the flag for showing wrong exercise
+      if (freshData.lastWrongExercise) {
+        if (freshData.showWrongExerciseNext) {
+          freshData.lastWrongExercise = null;
+          freshData.showWrongExerciseNext = false;
+        } else {
+          freshData.showWrongExerciseNext = true;
+        }
+        await saveAppData(freshData);
       }
-      await saveAppData(freshData);
+      
+      onDataUpdate(freshData);
+    } catch (error) {
+      console.error('Error selecting new exercise:', error);
+      // Don't get stuck - just pick a random exercise
+      const randomA = Math.floor(Math.random() * 10) + 1;
+      const randomB = Math.floor(Math.random() * 10) + 1;
+      setCurrentExercise({ a: randomA, b: randomB, group: 3 });
+      setStartTime(Date.now());
+      setAnswer('');
+      setShowingFeedback(false);
+      setFeedback(null);
     }
-    
-    onDataUpdate(freshData);
   };
 
   const handleSubmit = async () => {
