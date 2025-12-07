@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ScrollView,
   Platform,
+  Linking,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppData, Exercise, User } from '../types';
@@ -113,6 +114,13 @@ export const ReportScreen: React.FC<Props> = ({ user, appData, onBack }) => {
   const allTimeStats = getAllTimeStats(appData.results);
   const exercisesByGroup = getExercisesByGroup(appData);
 
+  const openWhatsApp = () => {
+    const phoneNumber = '972503337373';
+    const message = `היי עידן! 👋 אני משתמש/ת באפליקציית לוח הכפל`;
+    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    Linking.openURL(url);
+  };
+
   return (
     <LinearGradient colors={['#667eea', '#764ba2']} style={styles.container}>
       <View style={styles.header}>
@@ -169,6 +177,13 @@ export const ReportScreen: React.FC<Props> = ({ user, appData, onBack }) => {
           <ExerciseGroup group={3} exercises={exercisesByGroup[3]} />
           <ExerciseGroup group={2} exercises={exercisesByGroup[2]} />
           <ExerciseGroup group={1} exercises={exercisesByGroup[1]} />
+
+          {/* Feedback Button */}
+          <TouchableOpacity style={styles.feedbackButton} onPress={openWhatsApp}>
+            <Text style={styles.feedbackEmoji}>💬</Text>
+            <Text style={styles.feedbackText}>יש לך רעיון? הצעה? הערה?</Text>
+            <Text style={styles.feedbackSubtext}>לחץ כאן 🚀</Text>
+          </TouchableOpacity>
 
           <View style={styles.bottomPadding} />
         </View>
@@ -321,6 +336,34 @@ const styles = StyleSheet.create({
   },
   bottomPadding: {
     height: 40,
+  },
+  feedbackButton: {
+    backgroundColor: '#25D366',
+    borderRadius: 16,
+    padding: 20,
+    marginTop: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  feedbackEmoji: {
+    fontSize: 36,
+    marginBottom: 8,
+  },
+  feedbackText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  feedbackSubtext: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 14,
+    textAlign: 'center',
   },
 });
 
