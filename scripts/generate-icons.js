@@ -37,10 +37,10 @@ function generateIcon(size, filename, isAdaptive = false) {
   const padding = isAdaptive ? size * 0.15 : 0;
   const innerSize = size - (padding * 2);
   
-  // Background gradient (purple to blue - matching app theme)
+  // Background gradient (red hues)
   const gradient = ctx.createLinearGradient(0, 0, size, size);
-  gradient.addColorStop(0, '#667eea');
-  gradient.addColorStop(1, '#764ba2');
+  gradient.addColorStop(0, '#e74c3c');  // Bright red
+  gradient.addColorStop(1, '#c0392b');  // Darker red
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, size, size);
   
@@ -53,21 +53,24 @@ function generateIcon(size, filename, isAdaptive = false) {
     centerX - innerSize * 0.2, centerY - innerSize * 0.2, 0,
     centerX, centerY, innerSize * 0.6
   );
-  highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
+  highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.25)');
   highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
   ctx.fillStyle = highlightGradient;
   ctx.fillRect(0, 0, size, size);
   
-  // Draw "×" symbol (multiplication sign)
+  // Vertical offset to move everything up
+  const verticalOffset = -innerSize * 0.08;
+  
+  // Draw "×" symbol (multiplication sign) - smaller
   ctx.fillStyle = 'white';
-  ctx.font = `bold ${innerSize * 0.55}px Arial, sans-serif`;
+  ctx.font = `bold ${innerSize * 0.20}px Arial, sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-  ctx.shadowBlur = innerSize * 0.05;
-  ctx.shadowOffsetX = innerSize * 0.02;
-  ctx.shadowOffsetY = innerSize * 0.02;
-  ctx.fillText('×', centerX, centerY);
+  ctx.shadowBlur = innerSize * 0.03;
+  ctx.shadowOffsetX = innerSize * 0.01;
+  ctx.shadowOffsetY = innerSize * 0.01;
+  ctx.fillText('×', centerX, centerY - innerSize * 0.05 + verticalOffset);
   
   // Reset shadow
   ctx.shadowColor = 'transparent';
@@ -75,18 +78,22 @@ function generateIcon(size, filename, isAdaptive = false) {
   ctx.shadowOffsetX = 0;
   ctx.shadowOffsetY = 0;
   
-  // Draw small numbers (6 × 7 style)
+  // Draw numbers (6 × 7) - larger, centered around the × sign
+  ctx.font = `bold ${innerSize * 0.26}px Arial, sans-serif`;
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+  
+  // 6 on the left of ×
+  ctx.fillText('6', centerX - innerSize * 0.18, centerY - innerSize * 0.05 + verticalOffset);
+  // 7 on the right of ×
+  ctx.fillText('7', centerX + innerSize * 0.18, centerY - innerSize * 0.05 + verticalOffset);
+  
+  // Equal sign below the multiplication
   ctx.font = `bold ${innerSize * 0.18}px Arial, sans-serif`;
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+  ctx.fillText('=', centerX, centerY + innerSize * 0.15 + verticalOffset);
   
-  // Top left: 6
-  ctx.fillText('6', centerX - innerSize * 0.28, centerY - innerSize * 0.28);
-  // Top right: 7
-  ctx.fillText('7', centerX + innerSize * 0.28, centerY - innerSize * 0.28);
-  
-  // Bottom: =42
-  ctx.font = `bold ${innerSize * 0.16}px Arial, sans-serif`;
-  ctx.fillText('=42', centerX, centerY + innerSize * 0.38);
+  // 42 below the equal sign - slightly smaller
+  ctx.font = `bold ${innerSize * 0.20}px Arial, sans-serif`;
+  ctx.fillText('42', centerX, centerY + innerSize * 0.30 + verticalOffset);
   
   // Save to file
   const buffer = canvas.toBuffer('image/png');
@@ -99,10 +106,10 @@ function generateSplash(width, height, filename) {
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext('2d');
   
-  // Background gradient
+  // Background gradient (red hues to match icon)
   const gradient = ctx.createLinearGradient(0, 0, width, height);
-  gradient.addColorStop(0, '#667eea');
-  gradient.addColorStop(1, '#764ba2');
+  gradient.addColorStop(0, '#e74c3c');
+  gradient.addColorStop(1, '#c0392b');
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, width, height);
   

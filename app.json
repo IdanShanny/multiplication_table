@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#667eea"
+      "backgroundColor": "#e74c3c"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -23,7 +23,7 @@
       "package": "com.multiplication.table",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#667eea"
+        "backgroundColor": "#e74c3c"
       }
     },
     "web": {
