@@ -14,7 +14,6 @@ import { getExercisesByGroup } from '../exerciseLogic';
 import {
   getTodayStats,
   getWeekStats,
-  getMonthStats,
   getAllTimeStats,
   formatTime,
 } from '../statistics';
@@ -67,7 +66,7 @@ const ExerciseGroup: React.FC<{
   group: 1 | 2 | 3 | 4;
   exercises: Exercise[];
 }> = ({ group, exercises }) => {
-  const groupColors: Record<1 | 2 | 3 | 4, string[]> = {
+  const groupColors: Record<1 | 2 | 3 | 4, readonly [string, string]> = {
     1: ['#28a745', '#20c997'],
     2: ['#ffc107', '#fd7e14'],
     3: ['#dc3545', '#e83e8c'],
@@ -110,7 +109,6 @@ const ExerciseGroup: React.FC<{
 export const ReportScreen: React.FC<Props> = ({ user, appData, onBack }) => {
   const todayStats = getTodayStats(appData.results);
   const weekStats = getWeekStats(appData.results);
-  const monthStats = getMonthStats(appData.results);
   const allTimeStats = getAllTimeStats(appData.results);
   const exercisesByGroup = getExercisesByGroup(appData);
 
@@ -132,6 +130,17 @@ export const ReportScreen: React.FC<Props> = ({ user, appData, onBack }) => {
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
+          {/* Exercise Groups Section */}
+          <Text style={styles.sectionTitle}>📋 תרגילים לפי קבוצות</Text>
+          <Text style={styles.groupsExplanation}>
+            קבוצה 1 = שולט היטב | קבוצה 4 = צריך תרגול נוסף
+          </Text>
+
+          <ExerciseGroup group={4} exercises={exercisesByGroup[4]} />
+          <ExerciseGroup group={3} exercises={exercisesByGroup[3]} />
+          <ExerciseGroup group={2} exercises={exercisesByGroup[2]} />
+          <ExerciseGroup group={1} exercises={exercisesByGroup[1]} />
+
           {/* Statistics Section */}
           <Text style={styles.sectionTitle}>📈 סטטיסטיקות</Text>
 
@@ -152,31 +161,12 @@ export const ReportScreen: React.FC<Props> = ({ user, appData, onBack }) => {
           />
 
           <StatCard
-            title="החודש האחרון"
-            time={formatTime(monthStats.totalTime)}
-            correct={monthStats.correctCount}
-            wrong={monthStats.wrongCount}
-            total={monthStats.totalCount}
-          />
-
-          <StatCard
             title="מאז ומעולם"
             time={formatTime(allTimeStats.totalTime)}
             correct={allTimeStats.correctCount}
             wrong={allTimeStats.wrongCount}
             total={allTimeStats.totalCount}
           />
-
-          {/* Exercise Groups Section */}
-          <Text style={styles.sectionTitle}>📋 תרגילים לפי קבוצות</Text>
-          <Text style={styles.groupsExplanation}>
-            קבוצה 1 = שולט היטב | קבוצה 4 = צריך תרגול נוסף
-          </Text>
-
-          <ExerciseGroup group={4} exercises={exercisesByGroup[4]} />
-          <ExerciseGroup group={3} exercises={exercisesByGroup[3]} />
-          <ExerciseGroup group={2} exercises={exercisesByGroup[2]} />
-          <ExerciseGroup group={1} exercises={exercisesByGroup[1]} />
 
           {/* Feedback Button */}
           <TouchableOpacity style={styles.feedbackButton} onPress={openWhatsApp}>
