@@ -4,8 +4,14 @@
     "slug": "multiplication-table",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": false,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#667eea"
+    },
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -14,7 +20,14 @@
       "bundleIdentifier": "com.multiplication.table"
     },
     "android": {
-      "package": "com.multiplication.table"
+      "package": "com.multiplication.table",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#667eea"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {

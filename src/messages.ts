@@ -4,9 +4,11 @@ import { Gender } from './types';
 const getSuffix = (gender: Gender): string => gender === 'male' ? '' : 'ה';
 const getYou = (gender: Gender): string => gender === 'male' ? 'אתה' : 'את';
 const getGreat = (gender: Gender): string => gender === 'male' ? 'מעולה' : 'מעולה';
-const getContinue = (gender: Gender): string => gender === 'male' ? 'ממשיך' : 'ממשיכה';
+const getContinue = (gender: Gender): string => gender === 'male' ? 'תמשיך' : 'תמשיכי';
 const getKnow = (gender: Gender): string => gender === 'male' ? 'יודע' : 'יודעת';
 const getImprove = (gender: Gender): string => gender === 'male' ? 'משתפר' : 'משתפרת';
+const getChampion = (gender: Gender): string => gender === 'male' ? 'אלוף' : 'אלופה';
+const getAdvancing = (gender: Gender): string => gender === 'male' ? 'מתקדם' : 'מתקדמת';
 
 export const getCorrectMessages = (name: string, gender: Gender): string[] => {
   const suffix = getSuffix(gender);
@@ -15,6 +17,8 @@ export const getCorrectMessages = (name: string, gender: Gender): string[] => {
   const cont = getContinue(gender);
   const know = getKnow(gender);
   const improve = getImprove(gender);
+  const champion = getChampion(gender);
+  const advancing = getAdvancing(gender);
 
   return [
     // Short messages
@@ -28,7 +32,7 @@ export const getCorrectMessages = (name: string, gender: Gender): string[] => {
     
     // Medium messages
     `יפה מאוד, ${name}!`,
-    `${name}, ${you} אלוף${suffix}!`,
+    `${name}, ${you} ${champion}!`,
     `תשובה נכונה, ${name}!`,
     `${cont} ככה, ${name}!`,
     `${you} ${know} את זה!`,
@@ -38,42 +42,47 @@ export const getCorrectMessages = (name: string, gender: Gender): string[] => {
     `יפה מאוד, ${name}! לאט ובטוח ${you} לומד${suffix} את לוח הכפל!`,
     `${great}, ${name}! התרגול משתלם!`,
     `${name}, ${you} עושה עבודה נהדרת! ${cont} ככה!`,
-    `בול! ${name}, ${you} ממש מתקדם${suffix}!`,
+    `בול! ${name}, ${you} ממש ${advancing}!`,
     `${name}, איזה כיף! ${you} ${know} את התשובה!`,
-    `תשובה מושלמת, ${name}! ${you} על הדרך הנכונה!`,
+    `תשובה מושלמת, ${name}! ${you} בדרך הנכונה!`,
     `${name}, רואים שהתרגול עוזר! ${cont} ככה!`,
   ];
 };
 
 export const getWrongMessages = (name: string, gender: Gender, a: number, b: number, correctAnswer: number): string[] => {
-  const suffix = getSuffix(gender);
   const you = getYou(gender);
   const tryAgain = gender === 'male' ? 'תנסה' : 'תנסי';
   const remember = gender === 'male' ? 'תזכור' : 'תזכרי';
   const dontWorry = gender === 'male' ? 'אל תדאג' : 'אל תדאגי';
   const cont = getContinue(gender);
 
+  // Answer format: a×b=correctAnswer (e.g., 10×6=60)
   const answer = `${a}×${b}=${correctAnswer}`;
 
   return [
     // Short messages
-    `לא נכון. ${answer}`,
-    `טעות. ${answer}`,
-    `לא בדיוק. ${answer}`,
+    `לא נכון.`,
+    `טעות.`,
+    `לא בדיוק.`,
     
     // Medium messages
-    `לא נכון, ${name}. ${answer} - ${tryAgain} שוב!`,
-    `טעות קטנה, ${name}. ${answer}`,
-    `${name}, ${answer} - ${tryAgain} לזכור!`,
+    `לא נכון, ${name}. ${tryAgain} שוב!`,
+    `טעות קטנה, ${name}.`,
+    `${name}, ${tryAgain} לזכור!`,
     
     // Longer encouraging messages
-    `לא נורא, ${name}! ${answer}. טעויות עוזרות לנו ללמוד!`,
-    `${dontWorry}, ${name}! ${answer}. בפעם הבאה יהיה יותר קל!`,
-    `${name}, ${answer}. ${cont} להתאמן ויהיה לך קל יותר!`,
-    `טעות זה בסדר, ${name}! ${answer}. ${remember} את זה לפעם הבאה!`,
-    `${name}, ${answer}. כל טעות מקרבת אותך להצלחה!`,
-    `לא נכון, אבל ${you} בכיוון הנכון, ${name}! ${answer}`,
+    `לא נורא, ${name}! טעויות עוזרות לנו ללמוד!`,
+    `${dontWorry}, ${name}! בפעם הבאה יהיה יותר קל!`,
+    `${name}, ${cont} להתאמן ויהיה לך קל יותר!`,
+    `טעות זה בסדר, ${name}! ${remember} את זה לפעם הבאה!`,
+    `${name}, כל טעות מקרבת אותך להצלחה!`,
+    `לא נכון, אבל ${you} בכיוון הנכון, ${name}!`,
   ];
+};
+
+// Get the correct answer string separately for prominent display
+export const getCorrectAnswerString = (a: number, b: number, correctAnswer: number): string => {
+  return `${a}×${b}=${correctAnswer}`;
 };
 
 export const getRandomMessage = (messages: string[]): string => {

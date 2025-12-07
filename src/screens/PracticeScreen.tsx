@@ -13,7 +13,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { AppData, Exercise, ExerciseResult, User } from '../types';
 import { selectNextExercise } from '../exerciseLogic';
 import { saveExerciseResult, loadAppData, saveAppData } from '../storage';
-import { getCorrectMessages, getWrongMessages, getRandomMessage } from '../messages';
+import { getCorrectMessages, getWrongMessages, getRandomMessage, getCorrectAnswerString } from '../messages';
 
 interface Props {
   user: User;
@@ -30,7 +30,7 @@ export const PracticeScreen: React.FC<Props> = ({
 }) => {
   const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
   const [answer, setAnswer] = useState('');
-  const [feedback, setFeedback] = useState<{ message: string; isCorrect: boolean } | null>(null);
+  const [feedback, setFeedback] = useState<{ message: string; isCorrect: boolean; correctAnswerStr?: string } | null>(null);
   const [startTime, setStartTime] = useState<number>(0);
   const [showingFeedback, setShowingFeedback] = useState(false);
   
@@ -114,7 +114,10 @@ export const PracticeScreen: React.FC<Props> = ({
     
     const message = getRandomMessage(messages);
     
-    setFeedback({ message, isCorrect });
+    // For wrong answers, include the correct answer string for prominent display
+    const correctAnswerStr = isCorrect ? undefined : getCorrectAnswerString(currentExercise.a, currentExercise.b, correctAnswer);
+    
+    setFeedback({ message, isCorrect, correctAnswerStr });
     setShowingFeedback(true);
     
     // Animate feedback
@@ -126,10 +129,11 @@ export const PracticeScreen: React.FC<Props> = ({
       useNativeDriver: true,
     }).start();
 
-    // Move to next exercise after delay
-    setTimeout(() => {
-      selectNewExercise();
-    }, isCorrect ? 1500 : 2500);
+    // No timeout - wait for user to click "Continue" button
+  };
+
+  const handleContinue = () => {
+    selectNewExercise();
   };
 
   if (!currentExercise) {
@@ -238,6 +242,17 @@ export const PracticeScreen: React.FC<Props> = ({
               {feedback.isCorrect ? '🎉' : '💪'}
             </Text>
             <Text style={styles.feedbackText}>{feedback.message}</Text>
+            {/* Show correct answer prominently for wrong answers */}
+            {feedback.correctAnswerStr && (
+              <View style={styles.correctAnswerContainer}>
+                <Text style={styles.correctAnswerLabel}>התשובה הנכונה:</Text>
+                <Text style={styles.correctAnswerText}>{feedback.correctAnswerStr}</Text>
+              </View>
+            )}
+            {/* Continue button */}
+            <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
+              <Text style={styles.continueButtonText}>המשך ➜</Text>
+            </TouchableOpacity>
           </Animated.View>
         )}
       </KeyboardAvoidingView>
@@ -356,6 +371,44 @@ const styles = StyleSheet.create({
     color: '#333',
     textAlign: 'center',
     lineHeight: 28,
+  },
+  correctAnswerContainer: {
+    marginTop: 16,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 3,
+    borderColor: '#e74c3c',
+    shadowColor: '#e74c3c',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  correctAnswerLabel: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  correctAnswerText: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: '#e74c3c',
+    textAlign: 'center',
+  },
+  continueButton: {
+    marginTop: 20,
+    backgroundColor: '#667eea',
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 25,
+  },
+  continueButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
 

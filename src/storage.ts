@@ -3,13 +3,31 @@ import { AppData, Exercise, ExerciseResult, User } from './types';
 
 const STORAGE_KEY = 'multiplication_table_data';
 
-// Initialize all 100 exercises (1-10 × 1-10) in group 1
+// Determine initial group for an exercise based on the numbers
+const getInitialGroup = (a: number, b: number): 1 | 2 | 3 | 4 => {
+  // Group 1: Any exercise with '1' as one of the numbers
+  if (a === 1 || b === 1) {
+    return 1;
+  }
+  // Group 2: Any exercise with '2' as one of the numbers (but not '1')
+  if (a === 2 || b === 2) {
+    return 2;
+  }
+  // Group 4: Both numbers greater than 5
+  if (a > 5 && b > 5) {
+    return 4;
+  }
+  // Group 3: All the rest
+  return 3;
+};
+
+// Initialize all 100 exercises (1-10 × 1-10) with appropriate groups
 const initializeExercises = (): Record<string, Exercise> => {
   const exercises: Record<string, Exercise> = {};
   for (let a = 1; a <= 10; a++) {
     for (let b = 1; b <= 10; b++) {
       const key = `${a}×${b}`;
-      exercises[key] = { a, b, group: 1 };
+      exercises[key] = { a, b, group: getInitialGroup(a, b) };
     }
   }
   return exercises;
