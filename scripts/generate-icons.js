@@ -58,8 +58,8 @@ function generateIcon(size, filename, isAdaptive = false) {
   ctx.fillStyle = highlightGradient;
   ctx.fillRect(0, 0, size, size);
   
-  // Vertical offset to move everything up
-  const verticalOffset = -innerSize * 0.08;
+  // Vertical offset to move everything down slightly
+  const verticalOffset = -innerSize * 0.045;
   
   // Draw "×" symbol (multiplication sign) - smaller
   ctx.fillStyle = 'white';
@@ -79,7 +79,7 @@ function generateIcon(size, filename, isAdaptive = false) {
   ctx.shadowOffsetY = 0;
   
   // Draw numbers (6 × 7) - larger, centered around the × sign
-  ctx.font = `bold ${innerSize * 0.26}px Arial, sans-serif`;
+  ctx.font = `bold ${innerSize * 0.38}px Arial, sans-serif`;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
   
   // 6 on the left of ×
