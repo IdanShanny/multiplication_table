@@ -258,11 +258,14 @@ export const updateDailyScore = async (points: number): Promise<{ newScore: numb
   
   // Check if it's a new high score
   if (newScore > data.incentive.highScore) {
+    const previousHighScore = data.incentive.highScore;
     isNewRecord = true;
     data.incentive.highScore = newScore;
     
-    // Show popup only if not the first day and not shown today
-    if (data.incentive.highScore > points && !data.incentive.hasShownRecordPopupToday) {
+    // Show popup only if:
+    // 1. There was a previous high score (not first day/first usage)
+    // 2. Haven't shown the popup today yet
+    if (previousHighScore > 0 && !data.incentive.hasShownRecordPopupToday) {
       shouldShowRecordPopup = true;
       data.incentive.hasShownRecordPopupToday = true;
     }

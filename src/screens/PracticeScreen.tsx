@@ -265,7 +265,7 @@ export const PracticeScreen: React.FC<Props> = ({
   return (
     <LinearGradient colors={['#e74c3c', '#c0392b']} style={styles.container}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.keyboardView}
       >
         <ScrollView
