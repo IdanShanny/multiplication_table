@@ -1,0 +1,68 @@
+warning: in the working copy of 'src/screens/RegistrationScreen.tsx', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/src/screens/RegistrationScreen.tsx b/src/screens/RegistrationScreen.tsx[m
+[1mindex 3376881..82cc019 100644[m
+[1m--- a/src/screens/RegistrationScreen.tsx[m
+[1m+++ b/src/screens/RegistrationScreen.tsx[m
+[36m@@ -26,7 +26,7 @@[m [mexport const RegistrationScreen: React.FC<Props> = ({ onRegister }) => {[m
+       return;[m
+     }[m
+     if (!gender) {[m
+[31m-      setError('נא לבחור מגדר');[m
+[32m+[m[32m      setError('נא לבחור בן או בת');[m
+       return;[m
+     }[m
+     onRegister({ name: name.trim(), gender });[m
+[36m@@ -46,7 +46,7 @@[m [mexport const RegistrationScreen: React.FC<Props> = ({ onRegister }) => {[m
+           <Text style={styles.subtitle}>בואו נתחיל ללמוד!</Text>[m
+ [m
+           <View style={styles.inputContainer}>[m
+[31m-            <Text style={styles.label}>מה השם שלך?</Text>[m
+[32m+[m[32m            <Text style={styles.label}>איך קוראים לך?</Text>[m
+             <TextInput[m
+               style={styles.input}[m
+               value={name}[m
+[36m@@ -107,7 +107,12 @@[m [mexport const RegistrationScreen: React.FC<Props> = ({ onRegister }) => {[m
+             </View>[m
+           </View>[m
+ [m
+[31m-          {error ? <Text style={styles.error}>{error}</Text> : null}[m
+[32m+[m[32m          {error ? ([m
+[32m+[m[32m            <View style={styles.errorContainer}>[m
+[32m+[m[32m              <Text style={styles.errorEmoji}>⚠️</Text>[m
+[32m+[m[32m              <Text style={styles.errorText}>{error}</Text>[m
+[32m+[m[32m            </View>[m
+[32m+[m[32m          ) : null}[m
+ [m
+           <TouchableOpacity style={styles.button} onPress={handleSubmit}>[m
+             <LinearGradient[m
+[36m@@ -210,11 +215,26 @@[m [mconst styles = StyleSheet.create({[m
+   genderTextSelected: {[m
+     color: '#e74c3c',[m
+   },[m
+[31m-  error: {[m
+[31m-    color: '#f5576c',[m
+[31m-    textAlign: 'center',[m
+[32m+[m[32m  errorContainer: {[m
+[32m+[m[32m    backgroundColor: '#ffe6e6',[m
+[32m+[m[32m    borderWidth: 2,[m
+[32m+[m[32m    borderColor: '#e74c3c',[m
+[32m+[m[32m    borderRadius: 12,[m
+[32m+[m[32m    padding: 16,[m
+     marginBottom: 16,[m
+[31m-    fontSize: 16,[m
+[32m+[m[32m    flexDirection: 'row',[m
+[32m+[m[32m    alignItems: 'center',[m
+[32m+[m[32m    justifyContent: 'center',[m
+[32m+[m[32m  },[m
+[32m+[m[32m  errorEmoji: {[m
+[32m+[m[32m    fontSize: 24,[m
+[32m+[m[32m    marginRight: 10,[m
+[32m+[m[32m  },[m
+[32m+[m[32m  errorText: {[m
+[32m+[m[32m    color: '#c0392b',[m
+[32m+[m[32m    fontSize: 18,[m
+[32m+[m[32m    fontWeight: '600',[m
+[32m+[m[32m    textAlign: 'center',[m
+   },[m
+   button: {[m
+     marginTop: 8,[m

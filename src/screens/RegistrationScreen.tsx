@@ -26,7 +26,7 @@ export const RegistrationScreen: React.FC<Props> = ({ onRegister }) => {
       return;
     }
     if (!gender) {
-      setError('נא לבחור מגדר');
+      setError('נא לבחור בן או בת');
       return;
     }
     onRegister({ name: name.trim(), gender });
@@ -46,7 +46,7 @@ export const RegistrationScreen: React.FC<Props> = ({ onRegister }) => {
           <Text style={styles.subtitle}>בואו נתחיל ללמוד!</Text>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>מה השם שלך?</Text>
+            <Text style={styles.label}>איך קוראים לך?</Text>
             <TextInput
               style={styles.input}
               value={name}
@@ -107,7 +107,12 @@ export const RegistrationScreen: React.FC<Props> = ({ onRegister }) => {
             </View>
           </View>
 
-          {error ? <Text style={styles.error}>{error}</Text> : null}
+          {error ? (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorEmoji}>⚠️</Text>
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          ) : null}
 
           <TouchableOpacity style={styles.button} onPress={handleSubmit}>
             <LinearGradient
@@ -210,11 +215,26 @@ const styles = StyleSheet.create({
   genderTextSelected: {
     color: '#e74c3c',
   },
-  error: {
-    color: '#f5576c',
-    textAlign: 'center',
+  errorContainer: {
+    backgroundColor: '#ffe6e6',
+    borderWidth: 2,
+    borderColor: '#e74c3c',
+    borderRadius: 12,
+    padding: 16,
     marginBottom: 16,
-    fontSize: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorEmoji: {
+    fontSize: 24,
+    marginRight: 10,
+  },
+  errorText: {
+    color: '#c0392b',
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   button: {
     marginTop: 8,
