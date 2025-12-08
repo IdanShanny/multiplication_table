@@ -8,6 +8,7 @@ import {
   Animated,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppData, Exercise, ExerciseResult, User } from '../types';
@@ -194,111 +195,118 @@ export const PracticeScreen: React.FC<Props> = ({
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.greeting}>שלום, {user.name}! 👋</Text>
-          <TouchableOpacity style={styles.reportButton} onPress={onShowReport}>
-            <Text style={styles.reportButtonText}>📊 דוח</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Exercise Card */}
-        <Animated.View
-          style={[
-            styles.card,
-            {
-              opacity: exerciseAnim,
-              transform: [
-                {
-                  scale: exerciseAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.9, 1],
-                  }),
-                },
-              ],
-            },
-          ]}
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <View style={styles.exerciseContainer}>
-            <Text style={styles.exerciseText}>
-              {currentExercise.a} × {currentExercise.b} = ?
-            </Text>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.greeting}>שלום, {user.name}! 👋</Text>
+            <TouchableOpacity style={styles.reportButton} onPress={onShowReport}>
+              <Text style={styles.reportButtonText}>📊 דוח</Text>
+            </TouchableOpacity>
           </View>
 
-          <View style={styles.inputContainer}>
-            <TextInput
-              ref={inputRef}
-              style={styles.input}
-              value={answer}
-              onChangeText={setAnswer}
-              keyboardType="number-pad"
-              placeholder="התשובה שלך"
-              placeholderTextColor="#999"
-              textAlign="center"
-              editable={!showingFeedback}
-              onSubmitEditing={handleSubmit}
-              autoFocus
-            />
-          </View>
-
-          <TouchableOpacity
-            style={[styles.submitButton, showingFeedback && styles.submitButtonDisabled]}
-            onPress={handleSubmit}
-            disabled={showingFeedback || !answer.trim()}
-          >
-            <LinearGradient
-              colors={showingFeedback ? ['#ccc', '#aaa'] : ['#e74c3c', '#c0392b']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.submitButtonGradient}
-            >
-              <Text style={styles.submitButtonText}>בדוק ✓</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </Animated.View>
-
-        {/* Feedback */}
-        {feedback && (
+          {/* Exercise Card */}
           <Animated.View
             style={[
-              styles.feedbackContainer,
-              feedback.isCorrect ? styles.feedbackCorrect : styles.feedbackWrong,
+              styles.card,
               {
-                opacity: feedbackAnim,
+                opacity: exerciseAnim,
                 transform: [
                   {
-                    translateY: feedbackAnim.interpolate({
+                    scale: exerciseAnim.interpolate({
                       inputRange: [0, 1],
-                      outputRange: [50, 0],
-                    }),
-                  },
-                  {
-                    scale: feedbackAnim.interpolate({
-                      inputRange: [0, 0.5, 1],
-                      outputRange: [0.8, 1.05, 1],
+                      outputRange: [0.9, 1],
                     }),
                   },
                 ],
               },
             ]}
           >
-            <Text style={styles.feedbackEmoji}>
-              {feedback.isCorrect ? '🎉' : '💪'}
-            </Text>
-            <Text style={styles.feedbackText}>{feedback.message}</Text>
-            {/* Show correct answer prominently for wrong answers */}
-            {feedback.correctAnswerStr && (
-              <View style={styles.correctAnswerContainer}>
-                <Text style={styles.correctAnswerLabel}>התשובה הנכונה:</Text>
-                <Text style={styles.correctAnswerText}>{feedback.correctAnswerStr}</Text>
-              </View>
-            )}
-            {/* Continue button */}
-            <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
-              <Text style={styles.continueButtonText}>נמשיך ←</Text>
+            <View style={styles.exerciseContainer}>
+              <Text style={styles.exerciseText}>
+                {currentExercise.a} × {currentExercise.b} = ?
+              </Text>
+            </View>
+
+            <View style={styles.inputContainer}>
+              <TextInput
+                ref={inputRef}
+                style={styles.input}
+                value={answer}
+                onChangeText={setAnswer}
+                keyboardType="number-pad"
+                placeholder="התשובה שלך"
+                placeholderTextColor="#999"
+                textAlign="center"
+                editable={!showingFeedback}
+                onSubmitEditing={handleSubmit}
+                autoFocus
+              />
+            </View>
+
+            <TouchableOpacity
+              style={[styles.submitButton, showingFeedback && styles.submitButtonDisabled]}
+              onPress={handleSubmit}
+              disabled={showingFeedback || !answer.trim()}
+            >
+              <LinearGradient
+                colors={showingFeedback ? ['#ccc', '#aaa'] : ['#e74c3c', '#c0392b']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.submitButtonGradient}
+              >
+                <Text style={styles.submitButtonText}>בדוק ✓</Text>
+              </LinearGradient>
             </TouchableOpacity>
           </Animated.View>
-        )}
+
+          {/* Feedback */}
+          {feedback && (
+            <Animated.View
+              style={[
+                styles.feedbackContainer,
+                feedback.isCorrect ? styles.feedbackCorrect : styles.feedbackWrong,
+                {
+                  opacity: feedbackAnim,
+                  transform: [
+                    {
+                      translateY: feedbackAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [50, 0],
+                      }),
+                    },
+                    {
+                      scale: feedbackAnim.interpolate({
+                        inputRange: [0, 0.5, 1],
+                        outputRange: [0.8, 1.05, 1],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            >
+              <Text style={styles.feedbackEmoji}>
+                {feedback.isCorrect ? '🎉' : '💪'}
+              </Text>
+              <Text style={styles.feedbackText}>{feedback.message}</Text>
+              {/* Show correct answer prominently for wrong answers */}
+              {feedback.correctAnswerStr && (
+                <View style={styles.correctAnswerContainer}>
+                  <Text style={styles.correctAnswerLabel}>התשובה הנכונה:</Text>
+                  <Text style={styles.correctAnswerText}>{feedback.correctAnswerStr}</Text>
+                </View>
+              )}
+              {/* Continue button */}
+              <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
+                <Text style={styles.continueButtonText}>נמשיך ←</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          )}
+        </ScrollView>
       </KeyboardAvoidingView>
     </LinearGradient>
   );
@@ -310,8 +318,13 @@ const styles = StyleSheet.create({
   },
   keyboardView: {
     flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
     padding: 20,
-    paddingBottom: Platform.OS === 'android' ? 40 : 20, // Extra padding for Android devices with gesture navigation
+    paddingBottom: Platform.OS === 'android' ? 80 : 40, // Much more padding for Android devices with gesture navigation
   },
   loadingText: {
     color: 'white',
@@ -396,7 +409,7 @@ const styles = StyleSheet.create({
     paddingBottom: 32, // Extra bottom padding to keep content above system buttons
     borderRadius: 20,
     alignItems: 'center',
-    marginBottom: Platform.OS === 'android' ? 20 : 0, // Extra margin for Android
+    marginBottom: Platform.OS === 'android' ? 40 : 20, // Increased margin for Android
   },
   feedbackCorrect: {
     backgroundColor: '#d4edda',
