@@ -21,12 +21,22 @@ export interface ExerciseResult {
   timestamp: number;
 }
 
+export interface IncentiveData {
+  dailyScore: number;
+  highScore: number;
+  lastScoreDate: string; // Format: YYYY-MM-DD
+  hasShownRecordPopupToday: boolean;
+  currentStreak: number;
+  lastStreakDate: string; // Format: YYYY-MM-DD to detect day changes
+}
+
 export interface AppData {
   user: User | null;
   exercises: Record<string, Exercise>; // key: "a×b"
   results: ExerciseResult[];
   lastWrongExercise: { a: number; b: number } | null;
   showWrongExerciseNext: boolean;
+  incentive: IncentiveData;
 }
 
 export const DELAY_THRESHOLD = 10000; // 10 seconds in milliseconds
@@ -37,4 +47,11 @@ export const GROUP_WEIGHTS = {
   3: 9,
   4: 27,
 };
+
+
+
+
+
+
+
 

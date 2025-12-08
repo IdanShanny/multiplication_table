@@ -77,3 +77,10 @@ Scan the QR code with Expo Go app on your Android device.
 - Next exercise is different
 - Exercise after that is the same one they got wrong
 
+
+
+
+
+
+
+

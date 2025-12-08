@@ -33,12 +33,22 @@ const initializeExercises = (): Record<string, Exercise> => {
   return exercises;
 };
 
+const getDefaultIncentiveData = () => ({
+  dailyScore: 0,
+  highScore: 0,
+  lastScoreDate: new Date().toISOString().split('T')[0],
+  hasShownRecordPopupToday: false,
+  currentStreak: 0,
+  lastStreakDate: new Date().toISOString().split('T')[0],
+});
+
 const getDefaultAppData = (): AppData => ({
   user: null,
   exercises: initializeExercises(),
   results: [],
   lastWrongExercise: null,
   showWrongExerciseNext: false,
+  incentive: getDefaultIncentiveData(),
 });
 
 // Migrate and validate stored data to ensure compatibility with current version
@@ -52,6 +62,7 @@ const migrateAppData = (parsed: any): AppData => {
     results: [],
     lastWrongExercise: null,
     showWrongExerciseNext: false,
+    incentive: defaultData.incentive,
   };
   
   // Migrate user data
@@ -99,6 +110,34 @@ const migrateAppData = (parsed: any): AppData => {
   // Migrate showWrongExerciseNext
   if (typeof parsed.showWrongExerciseNext === 'boolean') {
     migrated.showWrongExerciseNext = parsed.showWrongExerciseNext;
+  }
+  
+  // Migrate incentive data
+  if (parsed.incentive && typeof parsed.incentive === 'object') {
+    const today = new Date().toISOString().split('T')[0];
+    const storedDate = parsed.incentive.lastScoreDate;
+    
+    // Reset daily score if it's a new day
+    if (storedDate === today) {
+      migrated.incentive = {
+        dailyScore: typeof parsed.incentive.dailyScore === 'number' ? parsed.incentive.dailyScore : 0,
+        highScore: typeof parsed.incentive.highScore === 'number' ? parsed.incentive.highScore : 0,
+        lastScoreDate: storedDate,
+        hasShownRecordPopupToday: typeof parsed.incentive.hasShownRecordPopupToday === 'boolean' ? parsed.incentive.hasShownRecordPopupToday : false,
+        currentStreak: typeof parsed.incentive.currentStreak === 'number' ? parsed.incentive.currentStreak : 0,
+        lastStreakDate: typeof parsed.incentive.lastStreakDate === 'string' ? parsed.incentive.lastStreakDate : today,
+      };
+    } else {
+      // New day - reset daily score but keep high score
+      migrated.incentive = {
+        dailyScore: 0,
+        highScore: typeof parsed.incentive.highScore === 'number' ? parsed.incentive.highScore : 0,
+        lastScoreDate: today,
+        hasShownRecordPopupToday: false,
+        currentStreak: 0,
+        lastStreakDate: today,
+      };
+    }
   }
   
   return migrated;
@@ -196,5 +235,77 @@ export const markNextExerciseShown = async (): Promise<void> => {
 
 export const clearAllData = async (): Promise<void> => {
   await AsyncStorage.removeItem(STORAGE_KEY);
+};
+
+// Incentive-related functions
+export const updateDailyScore = async (points: number): Promise<{ newScore: number; isNewRecord: boolean; shouldShowRecordPopup: boolean }> => {
+  const data = await loadAppData();
+  const today = new Date().toISOString().split('T')[0];
+  
+  // Reset if new day
+  if (data.incentive.lastScoreDate !== today) {
+    data.incentive.dailyScore = 0;
+    data.incentive.lastScoreDate = today;
+    data.incentive.hasShownRecordPopupToday = false;
+    data.incentive.currentStreak = 0;
+    data.incentive.lastStreakDate = today;
+  }
+  
+  data.incentive.dailyScore += points;
+  const newScore = data.incentive.dailyScore;
+  let isNewRecord = false;
+  let shouldShowRecordPopup = false;
+  
+  // Check if it's a new high score
+  if (newScore > data.incentive.highScore) {
+    isNewRecord = true;
+    data.incentive.highScore = newScore;
+    
+    // Show popup only if not the first day and not shown today
+    if (data.incentive.highScore > points && !data.incentive.hasShownRecordPopupToday) {
+      shouldShowRecordPopup = true;
+      data.incentive.hasShownRecordPopupToday = true;
+    }
+  }
+  
+  await saveAppData(data);
+  return { newScore, isNewRecord, shouldShowRecordPopup };
+};
+
+export const updateStreak = async (isCorrectAndFast: boolean): Promise<{ currentStreak: number; achievementReached: 5 | 10 | 20 | null }> => {
+  const data = await loadAppData();
+  const today = new Date().toISOString().split('T')[0];
+  
+  // Reset streak if new day
+  if (data.incentive.lastStreakDate !== today) {
+    data.incentive.currentStreak = 0;
+    data.incentive.lastStreakDate = today;
+  }
+  
+  if (isCorrectAndFast) {
+    const previousStreak = data.incentive.currentStreak;
+    data.incentive.currentStreak += 1;
+    const currentStreak = data.incentive.currentStreak;
+    
+    let achievementReached: 5 | 10 | 20 | null = null;
+    
+    // Check if reached a milestone
+    if (currentStreak === 5 || currentStreak === 10 || currentStreak === 20) {
+      achievementReached = currentStreak as 5 | 10 | 20;
+    }
+    
+    await saveAppData(data);
+    return { currentStreak, achievementReached };
+  } else {
+    // Reset streak on wrong or slow answer
+    data.incentive.currentStreak = 0;
+    await saveAppData(data);
+    return { currentStreak: 0, achievementReached: null };
+  }
+};
+
+export const getIncentiveData = async () => {
+  const data = await loadAppData();
+  return data.incentive;
 };
 

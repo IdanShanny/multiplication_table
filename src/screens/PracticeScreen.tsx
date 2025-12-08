@@ -11,10 +11,11 @@ import {
   ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { AppData, Exercise, ExerciseResult, User } from '../types';
+import { AppData, Exercise, ExerciseResult, User, DELAY_THRESHOLD } from '../types';
 import { selectNextExercise } from '../exerciseLogic';
-import { saveExerciseResult, loadAppData, saveAppData } from '../storage';
+import { saveExerciseResult, loadAppData, saveAppData, updateDailyScore, updateStreak, getIncentiveData } from '../storage';
 import { getCorrectMessages, getWrongMessages, getRandomMessage, getCorrectAnswerString } from '../messages';
+import { IncentivePopup } from '../components/IncentivePopup';
 
 interface Props {
   user: User;
@@ -35,6 +36,13 @@ export const PracticeScreen: React.FC<Props> = ({
   const [startTime, setStartTime] = useState<number>(0);
   const [showingFeedback, setShowingFeedback] = useState(false);
   
+  // Incentive states
+  const [dailyScore, setDailyScore] = useState(0);
+  const [highScore, setHighScore] = useState(0);
+  const [showIncentivePopup, setShowIncentivePopup] = useState(false);
+  const [incentivePopupType, setIncentivePopupType] = useState<'record' | 'streak'>('record');
+  const [incentivePopupData, setIncentivePopupData] = useState<any>(null);
+  
   const feedbackAnim = useRef(new Animated.Value(0)).current;
   const exerciseAnim = useRef(new Animated.Value(1)).current;
   const inputRef = useRef<TextInput>(null);
@@ -42,7 +50,19 @@ export const PracticeScreen: React.FC<Props> = ({
 
   useEffect(() => {
     loadFirstExercise();
+    loadIncentiveData();
   }, []);
+
+  // Load incentive data
+  const loadIncentiveData = async () => {
+    try {
+      const incentiveData = await getIncentiveData();
+      setDailyScore(incentiveData.dailyScore);
+      setHighScore(incentiveData.highScore);
+    } catch (error) {
+      console.error('Error loading incentive data:', error);
+    }
+  };
 
   // Load first exercise immediately without animation
   const loadFirstExercise = async () => {
@@ -152,6 +172,24 @@ export const PracticeScreen: React.FC<Props> = ({
 
     await saveExerciseResult(result);
     
+    // Calculate points based on the incentive rules
+    let points = 0;
+    const isFast = responseTime < DELAY_THRESHOLD;
+    
+    if (isCorrect) {
+      points = isFast ? 3 : 1;
+    } else {
+      points = -1;
+    }
+    
+    // Update daily score
+    const scoreResult = await updateDailyScore(points);
+    setDailyScore(scoreResult.newScore);
+    setHighScore(scoreResult.isNewRecord ? scoreResult.newScore : highScore);
+    
+    // Update streak and check for achievements
+    const streakResult = await updateStreak(isCorrect && isFast);
+    
     // Get feedback message
     const messages = isCorrect
       ? getCorrectMessages(user.name, user.gender)
@@ -172,12 +210,47 @@ export const PracticeScreen: React.FC<Props> = ({
       friction: 8,
       tension: 40,
       useNativeDriver: true,
-    }).start();
+    }).start(() => {
+      // After feedback animation, check for incentive popups
+      // Priority: streak achievements first, then high score
+      if (streakResult.achievementReached) {
+        // Add bonus points for streak achievement
+        const bonusPoints = streakResult.achievementReached;
+        updateDailyScore(bonusPoints).then((result) => {
+          setDailyScore(result.newScore);
+          if (result.isNewRecord) {
+            setHighScore(result.newScore);
+          }
+        });
+        
+        setIncentivePopupType('streak');
+        setIncentivePopupData({
+          streakCount: streakResult.achievementReached,
+          bonusPoints: bonusPoints,
+        });
+        setShowIncentivePopup(true);
+      } else if (scoreResult.shouldShowRecordPopup) {
+        setIncentivePopupType('record');
+        setIncentivePopupData({
+          newScore: scoreResult.newScore,
+        });
+        setShowIncentivePopup(true);
+      }
+    });
 
     // No timeout - wait for user to click "Continue" button
   };
 
   const handleContinue = () => {
+    // If incentive popup is showing, don't load new exercise yet
+    if (!showIncentivePopup) {
+      selectNewExercise();
+    }
+  };
+
+  const handleIncentiveContinue = () => {
+    setShowIncentivePopup(false);
+    // Now load the new exercise
     selectNewExercise();
   };
 
@@ -207,6 +280,18 @@ export const PracticeScreen: React.FC<Props> = ({
             <TouchableOpacity style={styles.reportButton} onPress={onShowReport}>
               <Text style={styles.reportButtonText}>📊 דוח</Text>
             </TouchableOpacity>
+          </View>
+
+          {/* Daily Score Display */}
+          <View style={styles.scoreContainer}>
+            <View style={styles.scoreBox}>
+              <Text style={styles.scoreLabel}>ניקוד יומי</Text>
+              <Text style={styles.scoreValue}>{dailyScore}</Text>
+            </View>
+            <View style={styles.scoreBox}>
+              <Text style={styles.scoreLabel}>שיא יומי</Text>
+              <Text style={styles.scoreValue}>{highScore}</Text>
+            </View>
           </View>
 
           {/* Exercise Card */}
@@ -308,6 +393,16 @@ export const PracticeScreen: React.FC<Props> = ({
           )}
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Incentive Popup */}
+      <IncentivePopup
+        visible={showIncentivePopup}
+        type={incentivePopupType}
+        userName={user.name}
+        userGender={user.gender}
+        data={incentivePopupData}
+        onContinue={handleIncentiveContinue}
+      />
     </LinearGradient>
   );
 };
@@ -354,6 +449,35 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+  },
+  scoreContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 20,
+    gap: 12,
+  },
+  scoreBox: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  scoreLabel: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  scoreValue: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#e74c3c',
   },
   card: {
     backgroundColor: 'white',

@@ -70,3 +70,10 @@ export const getExercisesByGroup = (appData: AppData): Record<1 | 2 | 3 | 4, Exe
   return groups;
 };
 
+
+
+
+
+
+
+
