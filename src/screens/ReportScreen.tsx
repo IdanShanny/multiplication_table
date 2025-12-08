@@ -123,7 +123,7 @@ export const ReportScreen: React.FC<Props> = ({ user, appData, onBack }) => {
     <LinearGradient colors={['#e74c3c', '#c0392b']} style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
-          <Text style={styles.backButtonText}>חזרה →</Text>
+          <Text style={styles.backButtonText}>→ חזרה</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>📊 הדוח של {user.name}</Text>
       </View>
