@@ -311,6 +311,7 @@ const styles = StyleSheet.create({
   keyboardView: {
     flex: 1,
     padding: 20,
+    paddingBottom: Platform.OS === 'android' ? 40 : 20, // Extra padding for Android devices with gesture navigation
   },
   loadingText: {
     color: 'white',
@@ -392,8 +393,10 @@ const styles = StyleSheet.create({
   feedbackContainer: {
     marginTop: 24,
     padding: 24,
+    paddingBottom: 32, // Extra bottom padding to keep content above system buttons
     borderRadius: 20,
     alignItems: 'center',
+    marginBottom: Platform.OS === 'android' ? 20 : 0, // Extra margin for Android
   },
   feedbackCorrect: {
     backgroundColor: '#d4edda',
