@@ -70,7 +70,8 @@ export const IncentivePopup: React.FC<Props> = ({
         return `הישג מדהים ${userName}! 20 תשובות נכונות ומהירות ברצף!`;
       }
     } else if (type === 'doublePoints') {
-      return `${userName}, על השאלה הבאה תקבל נקודות כפולות! 🎯`;
+      const verb = userGender === 'female' ? 'תקבלי' : 'תקבל';
+      return `${userName}, על השאלה הבאה ${verb} נקודות כפולות! 🎯`;
     }
     return '';
   };
