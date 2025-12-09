@@ -86,9 +86,9 @@ export const IncentivePopup: React.FC<Props> = ({
 
   const getSubMessage = () => {
     if (type === 'record' && data?.newScore) {
-      return `הניקוד החדש שלך: ${data.newScore} נקודות`;
+      return `השיא החדש שלך: ${data.newScore} נקודות`;
     } else if (type === 'streak' && data?.bonusPoints) {
-      return `קיבלת בונוס של +${data.bonusPoints} נקודות!`;
+      return `קיבלת בונוס של ${data.bonusPoints} נקודות!`;
     }
     return '';
   };
