@@ -190,32 +190,18 @@ export const PracticeScreen: React.FC<Props> = ({
     // Update streak and check for achievements
     const streakResult = await updateStreak(isCorrect && isFast);
     
-    // Get feedback message
-    const messages = isCorrect
-      ? getCorrectMessages(user.name, user.gender)
-      : getWrongMessages(user.name, user.gender, currentExercise.a, currentExercise.b, correctAnswer);
+    // Check if we need to show incentive popup (only for correct answers)
+    const hasStreakAchievement = streakResult.achievementReached;
+    const hasRecordPopup = scoreResult.shouldShowRecordPopup;
+    const showIncentive = isCorrect && (hasStreakAchievement || hasRecordPopup);
     
-    const message = getRandomMessage(messages);
-    
-    // For wrong answers, include the correct answer string for prominent display
-    const correctAnswerStr = isCorrect ? undefined : getCorrectAnswerString(currentExercise.a, currentExercise.b, correctAnswer);
-    
-    setFeedback({ message, isCorrect, correctAnswerStr });
-    setShowingFeedback(true);
-    
-    // Animate feedback
-    feedbackAnim.setValue(0);
-    Animated.spring(feedbackAnim, {
-      toValue: 1,
-      friction: 8,
-      tension: 40,
-      useNativeDriver: true,
-    }).start(() => {
-      // After feedback animation, check for incentive popups
-      // Priority: streak achievements first, then high score
-      if (streakResult.achievementReached) {
+    // If showing incentive popup, skip the regular feedback and show popup directly
+    if (showIncentive) {
+      setShowingFeedback(true);
+      
+      if (hasStreakAchievement) {
         // Add bonus points for streak achievement
-        const bonusPoints = streakResult.achievementReached;
+        const bonusPoints = streakResult.achievementReached!;
         updateDailyScore(bonusPoints).then((result) => {
           setDailyScore(result.newScore);
           if (result.isNewRecord) {
@@ -229,14 +215,36 @@ export const PracticeScreen: React.FC<Props> = ({
           bonusPoints: bonusPoints,
         });
         setShowIncentivePopup(true);
-      } else if (scoreResult.shouldShowRecordPopup) {
+      } else if (hasRecordPopup) {
         setIncentivePopupType('record');
         setIncentivePopupData({
           newScore: scoreResult.newScore,
         });
         setShowIncentivePopup(true);
       }
-    });
+    } else {
+      // Show regular feedback (for wrong answers or correct without incentive)
+      const messages = isCorrect
+        ? getCorrectMessages(user.name, user.gender)
+        : getWrongMessages(user.name, user.gender, currentExercise.a, currentExercise.b, correctAnswer);
+      
+      const message = getRandomMessage(messages);
+      
+      // For wrong answers, include the correct answer string for prominent display
+      const correctAnswerStr = isCorrect ? undefined : getCorrectAnswerString(currentExercise.a, currentExercise.b, correctAnswer);
+      
+      setFeedback({ message, isCorrect, correctAnswerStr });
+      setShowingFeedback(true);
+      
+      // Animate feedback
+      feedbackAnim.setValue(0);
+      Animated.spring(feedbackAnim, {
+        toValue: 1,
+        friction: 8,
+        tension: 40,
+        useNativeDriver: true,
+      }).start();
+    }
 
     // No timeout - wait for user to click "Continue" button
   };
