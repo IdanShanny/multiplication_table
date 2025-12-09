@@ -1,1 +1,14 @@
 node_modules
+
+# Android build outputs
+android/app/build/
+android/build/
+*.apk
+*.aab
+
+# Keystore files (IMPORTANT: Never commit these!)
+*.keystore
+*.jks
+
+# VS Code settings
+.vscode/
