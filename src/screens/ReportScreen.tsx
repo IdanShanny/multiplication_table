@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   ScrollView,
   Platform,
   Linking,
+  BackHandler,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppData, Exercise, User } from '../types';
@@ -111,6 +112,16 @@ export const ReportScreen: React.FC<Props> = ({ user, appData, onBack }) => {
   const weekStats = getWeekStats(appData.results);
   const allTimeStats = getAllTimeStats(appData.results);
   const exercisesByGroup = getExercisesByGroup(appData);
+
+  // Handle Android back button
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      onBack();
+      return true; // Prevent default behavior
+    });
+
+    return () => backHandler.remove();
+  }, [onBack]);
 
   const openWhatsApp = () => {
     const phoneNumber = '972503337373';
