@@ -68,10 +68,10 @@ const ExerciseGroup: React.FC<{
   exercises: Exercise[];
 }> = ({ group, exercises }) => {
   const groupColors: Record<1 | 2 | 3 | 4, readonly [string, string]> = {
-    1: ['#28a745', '#20c997'],
-    2: ['#ffc107', '#fd7e14'],
-    3: ['#dc3545', '#e83e8c'],
-    4: ['#6f42c1', '#e83e8c'],
+    1: ['#27ae60', '#2ecc71'],  // Green for excellent (keeping for functionality - success indicator)
+    2: ['#f39c12', '#e67e22'],  // Orange for good (keeping for functionality - warning indicator)
+    3: ['#e74c3c', '#c0392b'],  // Red for needs practice
+    4: ['#c0392b', '#a93226'],  // Dark red for needs more practice
   };
 
   const groupLabels: Record<1 | 2 | 3 | 4, string> = {
@@ -269,21 +269,21 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   correctText: {
-    color: '#28a745',
+    color: '#27ae60',
   },
   wrongText: {
-    color: '#dc3545',
+    color: '#e74c3c',
   },
   progressBarContainer: {
     height: 8,
-    backgroundColor: '#e9ecef',
+    backgroundColor: '#f8d7da',
     borderRadius: 4,
     marginTop: 12,
     overflow: 'hidden',
   },
   progressBar: {
     height: '100%',
-    backgroundColor: '#28a745',
+    backgroundColor: '#27ae60',
     borderRadius: 4,
   },
   groupsExplanation: {
@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
     height: 40,
   },
   feedbackButton: {
-    backgroundColor: '#25D366',
+    backgroundColor: '#25D366',  // Keeping WhatsApp green for brand recognition
     borderRadius: 16,
     padding: 20,
     marginTop: 24,

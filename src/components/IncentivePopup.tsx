@@ -128,10 +128,10 @@ export const IncentivePopup: React.FC<Props> = ({
           <LinearGradient
             colors={
               type === 'record' 
-                ? ['#FFD700', '#FFA500'] 
+                ? ['#e74c3c', '#c0392b']  // Red gradient for record
                 : type === 'doublePoints'
-                ? ['#9C27B0', '#7B1FA2']
-                : ['#4CAF50', '#45a049']
+                ? ['#c0392b', '#a93226']  // Dark red gradient for double points
+                : ['#e74c3c', '#d62c1a']  // Red gradient for streak
             }
             style={styles.gradient}
           >

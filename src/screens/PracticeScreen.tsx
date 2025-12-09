@@ -523,12 +523,12 @@ const styles = StyleSheet.create({
     color: '#e74c3c',
   },
   doublePointsBanner: {
-    backgroundColor: '#9C27B0',
+    backgroundColor: '#c0392b',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 20,
     marginBottom: 12,
-    shadowColor: '#9C27B0',
+    shadowColor: '#c0392b',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 8,
@@ -552,8 +552,8 @@ const styles = StyleSheet.create({
   },
   cardDoublePoints: {
     borderWidth: 4,
-    borderColor: '#9C27B0',
-    shadowColor: '#9C27B0',
+    borderColor: '#c0392b',
+    shadowColor: '#c0392b',
   },
   exerciseContainer: {
     alignItems: 'center',
@@ -603,12 +603,12 @@ const styles = StyleSheet.create({
   },
   feedbackCorrect: {
     backgroundColor: '#d4edda',
-    borderColor: '#28a745',
+    borderColor: '#27ae60',
     borderWidth: 2,
   },
   feedbackWrong: {
-    backgroundColor: '#fff3cd',
-    borderColor: '#ffc107',
+    backgroundColor: '#ffe6e6',
+    borderColor: '#e74c3c',
     borderWidth: 2,
   },
   feedbackEmoji: {

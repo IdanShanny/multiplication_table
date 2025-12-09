@@ -37,7 +37,7 @@ export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport
   };
 
   return (
-    <LinearGradient colors={['#667eea', '#764ba2']} style={styles.container}>
+    <LinearGradient colors={['#e74c3c', '#c0392b']} style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
           <Text style={styles.backButtonText}>← חזרה</Text>
@@ -50,7 +50,7 @@ export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport
         {/* Report Button */}
         <TouchableOpacity style={styles.reportButtonLarge} onPress={onShowReport}>
           <LinearGradient
-            colors={['#28a745', '#20c997']}
+            colors={['#27ae60', '#2ecc71']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.reportButtonGradient}
