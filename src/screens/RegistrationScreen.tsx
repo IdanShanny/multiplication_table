@@ -57,6 +57,7 @@ export const RegistrationScreen: React.FC<Props> = ({ onRegister }) => {
               placeholder="הכנס את שמך"
               placeholderTextColor="#999"
               textAlign="right"
+              maxLength={12}
             />
           </View>
 
