@@ -9,12 +9,12 @@ const getInitialGroup = (a: number, b: number): 1 | 2 | 3 | 4 => {
   if (a === 1 || b === 1) {
     return 1;
   }
-  // Group 2: Any exercise with '2' as one of the numbers (but not '1')
-  if (a === 2 || b === 2) {
+  // Group 2: Any exercise with '2' as one of the numbers (but not '1'), OR multiples of 10
+  if (a === 2 || b === 2 || a === 10 || b === 10) {
     return 2;
   }
-  // Group 4: Both numbers greater than 5
-  if (a > 5 && b > 5) {
+  // Group 4: Both numbers greater than 5 (but not 10)
+  if (a > 5 && b > 5 && a !== 10 && b !== 10) {
     return 4;
   }
   // Group 3: All the rest

@@ -47,7 +47,7 @@ export const GROUP_WEIGHTS = {
   1: 1,
   2: 3,
   3: 9,
-  4: 27,
+  4: 18,
 };
 
 
