@@ -28,6 +28,7 @@ export interface IncentiveData {
   hasShownRecordPopupToday: boolean;
   currentStreak: number;
   lastStreakDate: string; // Format: YYYY-MM-DD to detect day changes
+  firstUsageDate: string; // Format: YYYY-MM-DD - to prevent record popup on first day
 }
 
 export interface AppData {

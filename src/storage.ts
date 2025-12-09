@@ -33,14 +33,18 @@ const initializeExercises = (): Record<string, Exercise> => {
   return exercises;
 };
 
-const getDefaultIncentiveData = () => ({
-  dailyScore: 0,
-  highScore: 0,
-  lastScoreDate: new Date().toISOString().split('T')[0],
-  hasShownRecordPopupToday: false,
-  currentStreak: 0,
-  lastStreakDate: new Date().toISOString().split('T')[0],
-});
+const getDefaultIncentiveData = () => {
+  const today = new Date().toISOString().split('T')[0];
+  return {
+    dailyScore: 0,
+    highScore: 0,
+    lastScoreDate: today,
+    hasShownRecordPopupToday: false,
+    currentStreak: 0,
+    lastStreakDate: today,
+    firstUsageDate: today,
+  };
+};
 
 const getDefaultAppData = (): AppData => ({
   user: null,
@@ -116,6 +120,7 @@ const migrateAppData = (parsed: any): AppData => {
   if (parsed.incentive && typeof parsed.incentive === 'object') {
     const today = new Date().toISOString().split('T')[0];
     const storedDate = parsed.incentive.lastScoreDate;
+    const firstUsageDate = typeof parsed.incentive.firstUsageDate === 'string' ? parsed.incentive.firstUsageDate : today;
     
     // Reset daily score if it's a new day
     if (storedDate === today) {
@@ -126,6 +131,7 @@ const migrateAppData = (parsed: any): AppData => {
         hasShownRecordPopupToday: typeof parsed.incentive.hasShownRecordPopupToday === 'boolean' ? parsed.incentive.hasShownRecordPopupToday : false,
         currentStreak: typeof parsed.incentive.currentStreak === 'number' ? parsed.incentive.currentStreak : 0,
         lastStreakDate: typeof parsed.incentive.lastStreakDate === 'string' ? parsed.incentive.lastStreakDate : today,
+        firstUsageDate: firstUsageDate,
       };
     } else {
       // New day - reset daily score but keep high score
@@ -136,6 +142,7 @@ const migrateAppData = (parsed: any): AppData => {
         hasShownRecordPopupToday: false,
         currentStreak: 0,
         lastStreakDate: today,
+        firstUsageDate: firstUsageDate,
       };
     }
   }
@@ -258,11 +265,16 @@ export const updateDailyScore = async (points: number): Promise<{ newScore: numb
   
   // Check if it's a new high score
   if (newScore > data.incentive.highScore) {
+    const previousHighScore = data.incentive.highScore;
     isNewRecord = true;
     data.incentive.highScore = newScore;
     
-    // Show popup only if not the first day and not shown today
-    if (data.incentive.highScore > points && !data.incentive.hasShownRecordPopupToday) {
+    // Show popup only if:
+    // 1. Not the first day of usage
+    // 2. There was a previous high score (previousHighScore > 0)
+    // 3. Haven't shown the popup today yet
+    const isFirstDay = data.incentive.firstUsageDate === today;
+    if (!isFirstDay && previousHighScore > 0 && !data.incentive.hasShownRecordPopupToday) {
       shouldShowRecordPopup = true;
       data.incentive.hasShownRecordPopupToday = true;
     }
