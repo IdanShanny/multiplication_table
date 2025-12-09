@@ -21,14 +21,14 @@ interface Props {
   user: User;
   appData: AppData;
   onDataUpdate: (data: AppData) => void;
-  onShowReport: () => void;
+  onShowParentsGuide: () => void;
 }
 
 export const PracticeScreen: React.FC<Props> = ({
   user,
   appData,
   onDataUpdate,
-  onShowReport,
+  onShowParentsGuide,
 }) => {
   const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
   const [answer, setAnswer] = useState('');
@@ -312,8 +312,8 @@ export const PracticeScreen: React.FC<Props> = ({
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.greeting}>שלום, {user.name}! 👋</Text>
-            <TouchableOpacity style={styles.reportButton} onPress={onShowReport}>
-              <Text style={styles.reportButtonText}>📊 דוח</Text>
+            <TouchableOpacity style={styles.reportButton} onPress={onShowParentsGuide}>
+              <Text style={styles.reportButtonText}>👨‍👩‍👧 להורים</Text>
             </TouchableOpacity>
           </View>
 

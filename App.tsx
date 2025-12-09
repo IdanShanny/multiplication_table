@@ -4,6 +4,7 @@ import { View, StyleSheet, I18nManager } from 'react-native';
 import { RegistrationScreen } from './src/screens/RegistrationScreen';
 import { PracticeScreen } from './src/screens/PracticeScreen';
 import { ReportScreen } from './src/screens/ReportScreen';
+import { ParentsGuideScreen } from './src/screens/ParentsGuideScreen';
 import { AppData, User } from './src/types';
 import { loadAppData, saveUser } from './src/storage';
 
@@ -11,7 +12,7 @@ import { loadAppData, saveUser } from './src/storage';
 I18nManager.allowRTL(true);
 I18nManager.forceRTL(true);
 
-type Screen = 'loading' | 'registration' | 'practice' | 'report';
+type Screen = 'loading' | 'registration' | 'practice' | 'parentsGuide' | 'report';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('loading');
@@ -35,6 +36,10 @@ export default function App() {
 
   const handleDataUpdate = (data: AppData) => {
     setAppData(data);
+  };
+
+  const handleShowParentsGuide = () => {
+    setScreen('parentsGuide');
   };
 
   const handleShowReport = () => {
@@ -64,6 +69,19 @@ export default function App() {
     );
   }
 
+  if (screen === 'parentsGuide' && appData.user) {
+    return (
+      <>
+        <StatusBar style="light" />
+        <ParentsGuideScreen
+          user={appData.user}
+          onBack={handleBackToPractice}
+          onShowReport={handleShowReport}
+        />
+      </>
+    );
+  }
+
   if (screen === 'report' && appData.user) {
     return (
       <>
@@ -85,7 +103,7 @@ export default function App() {
           user={appData.user}
           appData={appData}
           onDataUpdate={handleDataUpdate}
-          onShowReport={handleShowReport}
+          onShowParentsGuide={handleShowParentsGuide}
         />
       </>
     );
