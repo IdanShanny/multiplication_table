@@ -13,7 +13,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppData, Exercise, ExerciseResult, User, DELAY_THRESHOLD } from '../types';
 import { selectNextExercise } from '../exerciseLogic';
-import { saveExerciseResult, loadAppData, saveAppData, updateDailyScore, updateStreak, getIncentiveData } from '../storage';
+import { saveExerciseResult, loadAppData, saveAppData, updateDailyScore, updateStreak, getIncentiveData, setDoublePointsForNextQuestion, checkAndConsumeDoublePoints } from '../storage';
 import { getCorrectMessages, getWrongMessages, getRandomMessage, getCorrectAnswerString } from '../messages';
 import { IncentivePopup } from '../components/IncentivePopup';
 
@@ -40,8 +40,9 @@ export const PracticeScreen: React.FC<Props> = ({
   const [dailyScore, setDailyScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
   const [showIncentivePopup, setShowIncentivePopup] = useState(false);
-  const [incentivePopupType, setIncentivePopupType] = useState<'record' | 'streak'>('record');
+  const [incentivePopupType, setIncentivePopupType] = useState<'record' | 'streak' | 'doublePoints'>('record');
   const [incentivePopupData, setIncentivePopupData] = useState<any>(null);
+  const [hasDoublePoints, setHasDoublePoints] = useState(false);
   
   const feedbackAnim = useRef(new Animated.Value(0)).current;
   const exerciseAnim = useRef(new Animated.Value(1)).current;
@@ -59,6 +60,7 @@ export const PracticeScreen: React.FC<Props> = ({
       const incentiveData = await getIncentiveData();
       setDailyScore(incentiveData.dailyScore);
       setHighScore(incentiveData.highScore);
+      setHasDoublePoints(incentiveData.nextQuestionDoublePoints);
     } catch (error) {
       console.error('Error loading incentive data:', error);
     }
@@ -113,6 +115,11 @@ export const PracticeScreen: React.FC<Props> = ({
         setCurrentExercise(exercise);
         setStartTime(Date.now());
         setAnswer('');
+        
+        // Update double points state from storage
+        getIncentiveData().then((incentiveData) => {
+          setHasDoublePoints(incentiveData.nextQuestionDoublePoints);
+        });
         
         // Animate in new exercise
         Animated.timing(exerciseAnim, {
@@ -172,6 +179,11 @@ export const PracticeScreen: React.FC<Props> = ({
 
     await saveExerciseResult(result);
     
+    // Check if this question had double points
+    const hadDoublePoints = await checkAndConsumeDoublePoints();
+    // Note: We keep hasDoublePoints state true until next question loads
+    // so the banner stays visible during feedback
+    
     // Calculate points based on the incentive rules
     let points = 0;
     const isFast = responseTime < DELAY_THRESHOLD;
@@ -180,6 +192,11 @@ export const PracticeScreen: React.FC<Props> = ({
       points = isFast ? 3 : 1;
     } else {
       points = -1;
+    }
+    
+    // Apply double points multiplier if active
+    if (hadDoublePoints) {
+      points *= 2;
     }
     
     // Update daily score
@@ -243,7 +260,17 @@ export const PracticeScreen: React.FC<Props> = ({
         friction: 8,
         tension: 40,
         useNativeDriver: true,
-      }).start();
+      }).start(() => {
+        // After regular feedback, randomly show double points popup (10% chance)
+        const shouldShowDoublePoints = Math.random() < 0.1;
+        if (shouldShowDoublePoints) {
+          setDoublePointsForNextQuestion(true);
+          setHasDoublePoints(true);
+          setIncentivePopupType('doublePoints');
+          setIncentivePopupData({});
+          setShowIncentivePopup(true);
+        }
+      });
     }
 
     // No timeout - wait for user to click "Continue" button
@@ -302,10 +329,18 @@ export const PracticeScreen: React.FC<Props> = ({
             </View>
           </View>
 
+          {/* Double Points Indicator */}
+          {hasDoublePoints && (
+            <View style={styles.doublePointsBanner}>
+              <Text style={styles.doublePointsText}>🎯 נקודות כפולות! 🎯</Text>
+            </View>
+          )}
+
           {/* Exercise Card */}
           <Animated.View
             style={[
               styles.card,
+              hasDoublePoints && styles.cardDoublePoints,
               {
                 opacity: exerciseAnim,
                 transform: [
@@ -487,6 +522,24 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#e74c3c',
   },
+  doublePointsBanner: {
+    backgroundColor: '#9C27B0',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    marginBottom: 12,
+    shadowColor: '#9C27B0',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  doublePointsText: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
   card: {
     backgroundColor: 'white',
     borderRadius: 24,
@@ -496,6 +549,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 20,
     elevation: 10,
+  },
+  cardDoublePoints: {
+    borderWidth: 4,
+    borderColor: '#9C27B0',
+    shadowColor: '#9C27B0',
   },
   exerciseContainer: {
     alignItems: 'center',

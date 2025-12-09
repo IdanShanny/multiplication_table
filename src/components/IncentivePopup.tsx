@@ -11,7 +11,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 interface Props {
   visible: boolean;
-  type: 'record' | 'streak';
+  type: 'record' | 'streak' | 'doublePoints';
   userName: string;
   userGender: 'male' | 'female';
   data?: {
@@ -69,6 +69,8 @@ export const IncentivePopup: React.FC<Props> = ({
       } else if (count === 20) {
         return `הישג מדהים ${userName}! 20 תשובות נכונות ומהירות ברצף!`;
       }
+    } else if (type === 'doublePoints') {
+      return `${userName}, על השאלה הבאה תקבל נקודות כפולות! 🎯`;
     }
     return '';
   };
@@ -80,6 +82,8 @@ export const IncentivePopup: React.FC<Props> = ({
       if (data.streakCount === 5) return '⭐';
       if (data.streakCount === 10) return '🌟';
       if (data.streakCount === 20) return '💎';
+    } else if (type === 'doublePoints') {
+      return '🎯';
     }
     return '🎉';
   };
@@ -89,6 +93,8 @@ export const IncentivePopup: React.FC<Props> = ({
       return `השיא החדש שלך: ${data.newScore} נקודות`;
     } else if (type === 'streak' && data?.bonusPoints) {
       return `קיבלת בונוס של ${data.bonusPoints} נקודות!`;
+    } else if (type === 'doublePoints') {
+      return 'זו ההזדמנות שלך להרוויח מלא נקודות!';
     }
     return '';
   };
@@ -119,7 +125,13 @@ export const IncentivePopup: React.FC<Props> = ({
           ]}
         >
           <LinearGradient
-            colors={type === 'record' ? ['#FFD700', '#FFA500'] : ['#4CAF50', '#45a049']}
+            colors={
+              type === 'record' 
+                ? ['#FFD700', '#FFA500'] 
+                : type === 'doublePoints'
+                ? ['#9C27B0', '#7B1FA2']
+                : ['#4CAF50', '#45a049']
+            }
             style={styles.gradient}
           >
             <Text style={styles.emoji}>{getEmoji()}</Text>

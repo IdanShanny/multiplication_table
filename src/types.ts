@@ -29,6 +29,7 @@ export interface IncentiveData {
   currentStreak: number;
   lastStreakDate: string; // Format: YYYY-MM-DD to detect day changes
   firstUsageDate: string; // Format: YYYY-MM-DD - to prevent record popup on first day
+  nextQuestionDoublePoints: boolean; // Whether the next question awards double points
 }
 
 export interface AppData {

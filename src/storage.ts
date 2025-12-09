@@ -43,6 +43,7 @@ const getDefaultIncentiveData = () => {
     currentStreak: 0,
     lastStreakDate: today,
     firstUsageDate: today,
+    nextQuestionDoublePoints: false,
   };
 };
 
@@ -132,6 +133,7 @@ const migrateAppData = (parsed: any): AppData => {
         currentStreak: typeof parsed.incentive.currentStreak === 'number' ? parsed.incentive.currentStreak : 0,
         lastStreakDate: typeof parsed.incentive.lastStreakDate === 'string' ? parsed.incentive.lastStreakDate : today,
         firstUsageDate: firstUsageDate,
+        nextQuestionDoublePoints: typeof parsed.incentive.nextQuestionDoublePoints === 'boolean' ? parsed.incentive.nextQuestionDoublePoints : false,
       };
     } else {
       // New day - reset daily score but keep high score
@@ -143,6 +145,7 @@ const migrateAppData = (parsed: any): AppData => {
         currentStreak: 0,
         lastStreakDate: today,
         firstUsageDate: firstUsageDate,
+        nextQuestionDoublePoints: false,
       };
     }
   }
@@ -319,4 +322,20 @@ export const updateStreak = async (isCorrectAndFast: boolean): Promise<{ current
 export const getIncentiveData = async () => {
   const data = await loadAppData();
   return data.incentive;
+};
+
+export const setDoublePointsForNextQuestion = async (enable: boolean): Promise<void> => {
+  const data = await loadAppData();
+  data.incentive.nextQuestionDoublePoints = enable;
+  await saveAppData(data);
+};
+
+export const checkAndConsumeDoublePoints = async (): Promise<boolean> => {
+  const data = await loadAppData();
+  const hasDoublePoints = data.incentive.nextQuestionDoublePoints;
+  if (hasDoublePoints) {
+    data.incentive.nextQuestionDoublePoints = false;
+    await saveAppData(data);
+  }
+  return hasDoublePoints;
 };
