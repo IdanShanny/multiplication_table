@@ -321,11 +321,11 @@ export const PracticeScreen: React.FC<Props> = ({
           <View style={styles.scoreContainer}>
             <View style={styles.scoreBox}>
               <Text style={styles.scoreLabel}>ניקוד יומי</Text>
-              <Text style={styles.scoreValue}>{dailyScore}</Text>
+              <Text style={[styles.scoreValue, styles.ltr]}>{dailyScore}</Text>
             </View>
             <View style={styles.scoreBox}>
               <Text style={styles.scoreLabel}>שיא יומי</Text>
-              <Text style={styles.scoreValue}>{highScore}</Text>
+              <Text style={[styles.scoreValue, styles.ltr]}>{highScore}</Text>
             </View>
           </View>
 
@@ -355,7 +355,7 @@ export const PracticeScreen: React.FC<Props> = ({
             ]}
           >
             <View style={styles.exerciseContainer}>
-              <Text style={styles.exerciseText}>
+              <Text style={[styles.exerciseText, styles.ltr]}>
                 {currentExercise.a} × {currentExercise.b} = ?
               </Text>
             </View>
@@ -471,7 +471,7 @@ const styles = StyleSheet.create({
     marginTop: 100,
   },
   header: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: Platform.OS === 'ios' ? 40 : 20,
@@ -494,7 +494,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   scoreContainer: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     justifyContent: 'space-around',
     marginBottom: 20,
     gap: 12,
@@ -563,6 +563,10 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: 'bold',
     color: '#333',
+  },
+  ltr: {
+    writingDirection: 'ltr',
+    textAlign: 'center',
   },
   inputContainer: {
     marginBottom: 20,

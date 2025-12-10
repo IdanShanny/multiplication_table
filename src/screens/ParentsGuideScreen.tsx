@@ -141,21 +141,21 @@ export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport
           <Text style={styles.sectionTitle}>🎁 מערכת תמריצים</Text>
           
           <Text style={styles.subSectionTitle}>📊 ניקוד יומי</Text>
-          <Text style={styles.bulletText}>• +3 נקודות על תשובה נכונה ומהירה</Text>
-          <Text style={styles.bulletText}>• +1 נקודה על תשובה נכונה איטית</Text>
-          <Text style={styles.bulletText}>• -1 נקודה על תשובה שגויה</Text>
+          <Text style={styles.bulletText}>• <Text style={styles.ltr}>+3</Text> נקודות על תשובה נכונה ומהירה</Text>
+          <Text style={styles.bulletText}>• <Text style={styles.ltr}>+1</Text> נקודה על תשובה נכונה איטית</Text>
+          <Text style={styles.bulletText}>• <Text style={styles.ltr}>-1</Text> נקודה על תשובה שגויה</Text>
           <Text style={styles.text}>
             הילד רואה את הניקוד בזמן אמת ואת השיא היומי. כשהוא שובר את השיא, הוא מקבל פופ-אפ מעודד.
           </Text>
 
           <Text style={styles.subSectionTitle}>🔥 רצפי הצלחה</Text>
-          <Text style={styles.bulletText}>• 5 תשובות ברצף = +5 נקודות בונוס 🌟</Text>
-          <Text style={styles.bulletText}>• 10 ברצף = +10 נקודות בונוס ⭐</Text>
-          <Text style={styles.bulletText}>• 20 ברצף = +20 נקודות בונוס 💎</Text>
+          <Text style={styles.bulletText}>• 5 תשובות ברצף = <Text style={styles.ltr}>+5</Text> נקודות בונוס 🌟</Text>
+          <Text style={styles.bulletText}>• 10 ברצף = <Text style={styles.ltr}>+10</Text> נקודות בונוס ⭐</Text>
+          <Text style={styles.bulletText}>• 20 ברצף = <Text style={styles.ltr}>+20</Text> נקודות בונוס 💎</Text>
 
           <Text style={styles.subSectionTitle}>🎯 נקודות כפולות</Text>
           <Text style={styles.text}>
-            באופן אקראי (10%), הילד מקבל הודעה: "על השאלה הבאה תקבל/י נקודות כפולות!" - השאלה הבאה מסומנת בבאנר סגול והניקוד מוכפל ×2.
+            באופן אקראי (10%), הילד מקבל הודעה: "על השאלה הבאה תקבל/י נקודות כפולות!" - השאלה הבאה מסומנת בבאנר סגול והניקוד מוכפל פי שניים.
           </Text>
 
           <Text style={styles.sectionTitle}>📈 דוח התקדמות - כלי לעקוב ולעזור</Text>
@@ -361,6 +361,9 @@ const styles = StyleSheet.create({
   bold: {
     fontWeight: 'bold',
     color: '#e74c3c',
+  },
+  ltr: {
+    writingDirection: 'ltr',
   },
   bulletText: {
     fontSize: 15,
