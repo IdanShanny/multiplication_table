@@ -366,7 +366,8 @@ export const PracticeScreen: React.FC<Props> = ({
                 style={styles.input}
                 value={answer}
                 onChangeText={setAnswer}
-                keyboardType="number-pad"
+                keyboardType={Platform.OS === 'ios' ? 'number-pad' : 'numeric'}
+                returnKeyType="done"
                 placeholder="התשובה שלך"
                 placeholderTextColor="#999"
                 textAlign="center"
