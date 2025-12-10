@@ -40,7 +40,7 @@ export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport
     <LinearGradient colors={['#e74c3c', '#c0392b']} style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
-          <Text style={styles.backButtonText}>← חזרה</Text>
+          <Text style={styles.backButtonText}>→ חזרה</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>מדריך להורים</Text>
         <View style={styles.placeholder} />
