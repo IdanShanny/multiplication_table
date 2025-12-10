@@ -143,6 +143,9 @@ export const ReportScreen: React.FC<Props> = ({ user, appData, onBack }) => {
         <View style={styles.content}>
           {/* Exercise Groups Section */}
           <Text style={styles.sectionTitle}>📋 תרגילים לפי קבוצות</Text>
+          <Text style={styles.helpText}>
+            כל תרגיל נמצא בקבוצה לפי רמת השליטה של {user.name}. תרגילים מקבוצה 4 מופיעים בתדירות גבוהה יותר באפליקציה, כך ש{user.gender === 'female' ? 'היא מתרגלת' : 'הוא מתרגל'} יותר את מה שצריך. זה עוזר לכם לראות במדויק איפה יש קושי ולתמוך בצורה ממוקדת.
+          </Text>
           <Text style={styles.groupsExplanation}>
             קבוצה 1 = שולט היטב | קבוצה 4 = צריך תרגול נוסף
           </Text>
@@ -291,6 +294,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     marginBottom: 16,
+  },
+  helpText: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 15,
+    lineHeight: 22,
+    marginBottom: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    padding: 12,
+    borderRadius: 8,
   },
   groupContainer: {
     marginBottom: 16,
