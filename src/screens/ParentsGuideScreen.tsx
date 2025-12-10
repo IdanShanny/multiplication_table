@@ -56,8 +56,8 @@ export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport
             style={styles.reportButtonGradient}
           >
             <Text style={styles.reportButtonIcon}>📊</Text>
-            <Text style={styles.reportButtonText}>רוצים לראות איך {user.name} מתקדם/ת?</Text>
-            <Text style={styles.reportButtonSubtext}>לחצו כאן לדוח מפורט</Text>
+            <Text style={styles.reportButtonText}>רוצים לראות איך {user.name} {user.gender === 'female' ? 'מתקדמת' : 'מתקדם'}?</Text>
+            <Text style={styles.reportButtonSubtext}>לחצו כאן לדו"ח מפורט</Text>
           </LinearGradient>
         </TouchableOpacity>
 
@@ -135,32 +135,22 @@ export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport
             יש הבדל עצום בין ילד שעונה 7×8=56 אחרי 15 שניות לבין ילד שעונה תוך שנייה. <Text style={styles.bold}>רק שליטה אוטומטית עוזרת בלמידה מתקדמת.</Text>
           </Text>
           <Text style={styles.bulletText}>✅ תשובה נכונה מתחת ל-10 שניות = התרגיל יורד קבוצה</Text>
-          <Text style={styles.bulletText}>⚠️ תשובה נכונה מעל 10 שניות = התרגיל נשאר באותה קבוצה</Text>
-          <Text style={styles.bulletText}>❌ תשובה שגויה = התרגיל עולה קבוצה</Text>
+          <Text style={styles.bulletText}>❌ תשובה שגויה או איטית (מעל 10 שניות) = התרגיל עולה קבוצה</Text>
 
           <Text style={styles.sectionTitle}>🎁 מערכת תמריצים</Text>
-          
-          <Text style={styles.subSectionTitle}>📊 ניקוד יומי</Text>
-          <Text style={styles.bulletText}>• <Text style={styles.ltr}>+3</Text> נקודות על תשובה נכונה ומהירה</Text>
-          <Text style={styles.bulletText}>• <Text style={styles.ltr}>+1</Text> נקודה על תשובה נכונה איטית</Text>
-          <Text style={styles.bulletText}>• <Text style={styles.ltr}>-1</Text> נקודה על תשובה שגויה</Text>
           <Text style={styles.text}>
-            הילד רואה את הניקוד בזמן אמת ואת השיא היומי. כשהוא שובר את השיא, הוא מקבל פופ-אפ מעודד.
+            כדי להפוך את התרגול למשהו שהילד <Text style={styles.bold}>רוצה</Text> לעשות ולא רק צריך, הוספנו מערכת תמריצים מגוונת:
+          </Text>
+          <Text style={styles.bulletText}>• <Text style={styles.bold}>ניקוד יומי</Text> - צבירת נקודות על תשובות נכונות, עם שיא יומי שמעודד שיפור</Text>
+          <Text style={styles.bulletText}>• <Text style={styles.bold}>בונוסים על רצפים</Text> - הישגים מיוחדים כשעונים נכון כמה פעמים ברצף</Text>
+          <Text style={styles.bulletText}>• <Text style={styles.bold}>הפתעות אקראיות</Text> - שאלות עם נקודות כפולות שמופיעות באופן בלתי צפוי</Text>
+          <Text style={styles.text}>
+            האלמנט המשחקי הזה יוצר מוטיבציה פנימית ומעודד תרגול יומי עצמאי.
           </Text>
 
-          <Text style={styles.subSectionTitle}>🔥 רצפי הצלחה</Text>
-          <Text style={styles.bulletText}>• 5 תשובות ברצף = <Text style={styles.ltr}>+5</Text> נקודות בונוס 🌟</Text>
-          <Text style={styles.bulletText}>• 10 ברצף = <Text style={styles.ltr}>+10</Text> נקודות בונוס ⭐</Text>
-          <Text style={styles.bulletText}>• 20 ברצף = <Text style={styles.ltr}>+20</Text> נקודות בונוס 💎</Text>
-
-          <Text style={styles.subSectionTitle}>🎯 נקודות כפולות</Text>
+          <Text style={styles.sectionTitle}>📈 דו"ח התקדמות - כלי לעקוב ולעזור</Text>
           <Text style={styles.text}>
-            באופן אקראי (10%), הילד מקבל הודעה: "על השאלה הבאה תקבל/י נקודות כפולות!" - השאלה הבאה מסומנת בבאנר סגול והניקוד מוכפל פי שניים.
-          </Text>
-
-          <Text style={styles.sectionTitle}>📈 דוח התקדמות - כלי לעקוב ולעזור</Text>
-          <Text style={styles.text}>
-            לחצו על כפתור "דוח" כדי לראות סטטיסטיקות (היום, השבוע, כל הזמנים) וחלוקה לפי קבוצות - זה החלק הכי שימושי!
+            לחצו על כפתור <Text style={styles.bold}>"צפייה בדו"ח מפורט"</Text> למעלה כדי לראות סטטיסטיקות (היום, השבוע, כל הזמנים) וחלוקה לפי קבוצות - זה החלק הכי שימושי!
           </Text>
 
           <Text style={styles.subSectionTitle}>💡 איך להשתמש במידע?</Text>
@@ -197,7 +187,7 @@ export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport
           <View style={styles.highlightBox}>
             <Text style={styles.highlightText}>✅ למידה חכמה - כל תרגיל מותאם לרמת הילד</Text>
             <Text style={styles.highlightText}>✅ מוטיבציה מובנית - ניקוד, הישגים, הפתעות</Text>
-            <Text style={styles.highlightText}>✅ כלי מעקב - דוח מפורט לזיהוי קשיים</Text>
+            <Text style={styles.highlightText}>✅ כלי מעקב - דו"ח מפורט לזיהוי קשיים</Text>
             <Text style={styles.highlightText}>✅ חינם לחלוטין - ללא פרסומות, ללא רכישות</Text>
             <Text style={styles.highlightText}>✅ פרטיות מלאה - כל המידע נשמר רק במכשיר</Text>
             <Text style={styles.highlightText}>✅ מבוסס על מחקר - למידה מרווחת, חזרה מיידית, מדידת מהירות</Text>
