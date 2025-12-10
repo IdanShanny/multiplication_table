@@ -133,10 +133,10 @@ export const ReportScreen: React.FC<Props> = ({ user, appData, onBack }) => {
   return (
     <LinearGradient colors={['#e74c3c', '#c0392b']} style={styles.container}>
       <View style={styles.header}>
+        <Text style={styles.headerTitle}>📊 הדו"ח של {user.name}</Text>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
           <Text style={styles.backButtonText}>→ חזרה</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>📊 הדוח של {user.name}</Text>
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
@@ -202,6 +202,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
     paddingHorizontal: 20,

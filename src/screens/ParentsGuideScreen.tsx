@@ -39,11 +39,11 @@ export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport
   return (
     <LinearGradient colors={['#e74c3c', '#c0392b']} style={styles.container}>
       <View style={styles.header}>
+        <View style={styles.placeholder} />
+        <Text style={styles.headerTitle}>מדריך להורים</Text>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
           <Text style={styles.backButtonText}>→ חזרה</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>מדריך להורים</Text>
-        <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
@@ -212,9 +212,6 @@ export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport
           {/* Contact Section */}
           <View style={styles.contactSection}>
             <Text style={styles.contactTitle}>יש לך רעיון? הצעה? הערה?</Text>
-            <Text style={styles.contactText}>
-              אשמח לשמוע ממך! לחץ על הכפתור ושלח לי הודעה בווטסאפ 💬
-            </Text>
             <TouchableOpacity style={styles.whatsappButton} onPress={openWhatsApp}>
               <LinearGradient
                 colors={['#25D366', '#128C7E']}
