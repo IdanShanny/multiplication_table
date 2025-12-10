@@ -311,21 +311,21 @@ export const PracticeScreen: React.FC<Props> = ({
         >
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.greeting}>שלום, {user.name}! 👋</Text>
             <TouchableOpacity style={styles.reportButton} onPress={onShowParentsGuide}>
               <Text style={styles.reportButtonText}>👨‍👩‍👧 להורים</Text>
             </TouchableOpacity>
+            <Text style={styles.greeting}>שלום, {user.name}! 👋</Text>
           </View>
 
           {/* Daily Score Display */}
           <View style={styles.scoreContainer}>
             <View style={styles.scoreBox}>
-              <Text style={styles.scoreLabel}>ניקוד יומי</Text>
-              <Text style={[styles.scoreValue, styles.ltr]}>{dailyScore}</Text>
-            </View>
-            <View style={styles.scoreBox}>
               <Text style={styles.scoreLabel}>שיא יומי</Text>
               <Text style={[styles.scoreValue, styles.ltr]}>{highScore}</Text>
+            </View>
+            <View style={styles.scoreBox}>
+              <Text style={styles.scoreLabel}>ניקוד יומי</Text>
+              <Text style={[styles.scoreValue, styles.ltr]}>{dailyScore}</Text>
             </View>
           </View>
 
@@ -472,7 +472,7 @@ const styles = StyleSheet.create({
     marginTop: 100,
   },
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: Platform.OS === 'ios' ? 40 : 20,
@@ -495,7 +495,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   scoreContainer: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-around',
     marginBottom: 20,
     gap: 12,
