@@ -476,7 +476,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: Platform.OS === 'ios' ? 40 : 20,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   greeting: {
     color: 'white',
@@ -497,14 +497,14 @@ const styles = StyleSheet.create({
   scoreContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 20,
+    marginBottom: 16,
     gap: 12,
   },
   scoreBox: {
     flex: 1,
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderRadius: 16,
-    padding: 16,
+    padding: 12,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -544,7 +544,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: 'white',
     borderRadius: 24,
-    padding: 24,
+    padding: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.3,
@@ -558,7 +558,7 @@ const styles = StyleSheet.create({
   },
   exerciseContainer: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 18,
   },
   exerciseText: {
     fontSize: 48,
@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: 14,
   },
   input: {
     borderWidth: 3,
