@@ -36,20 +36,20 @@ const StatCard: React.FC<{
   <View style={styles.statCard}>
     <Text style={styles.statTitle}>{title}</Text>
     <View style={styles.statRow}>
-      <Text style={styles.statLabel}>⏱️ זמן תרגול:</Text>
       <Text style={styles.statValue}>{time}</Text>
+      <Text style={styles.statLabel}>⏱️ זמן תרגול:</Text>
     </View>
     <View style={styles.statRow}>
-      <Text style={styles.statLabel}>✅ תשובות נכונות:</Text>
       <Text style={[styles.statValue, styles.correctText]}>{correct}</Text>
+      <Text style={styles.statLabel}>✅ תשובות נכונות:</Text>
     </View>
     <View style={styles.statRow}>
-      <Text style={styles.statLabel}>❌ תשובות שגויות:</Text>
       <Text style={[styles.statValue, styles.wrongText]}>{wrong}</Text>
+      <Text style={styles.statLabel}>❌ תשובות שגויות:</Text>
     </View>
     <View style={styles.statRow}>
-      <Text style={styles.statLabel}>📝 סה"כ שאלות:</Text>
       <Text style={styles.statValue}>{total}</Text>
+      <Text style={styles.statLabel}>📝 סה"כ שאלות:</Text>
     </View>
     {total > 0 && (
       <View style={styles.progressBarContainer}>
@@ -92,8 +92,8 @@ const ExerciseGroup: React.FC<{
         end={{ x: 1, y: 0 }}
         style={styles.groupHeader}
       >
-        <Text style={styles.groupTitle}>{groupLabels[group]}</Text>
         <Text style={styles.groupCount}>{exercises.length} תרגילים</Text>
+        <Text style={styles.groupTitle}>{groupLabels[group]}</Text>
       </LinearGradient>
       <View style={styles.exercisesList}>
         {exercises.map((ex) => (
@@ -273,11 +273,13 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 16,
     color: '#666',
+    writingDirection: 'rtl',
   },
   statValue: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
+    writingDirection: 'ltr',
   },
   correctText: {
     color: '#27ae60',
@@ -333,10 +335,12 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+    writingDirection: 'rtl',
   },
   groupCount: {
     color: 'rgba(255, 255, 255, 0.9)',
     fontSize: 14,
+    writingDirection: 'rtl',
   },
   exercisesList: {
     flexDirection: 'row',
@@ -354,6 +358,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
     fontWeight: '500',
+    writingDirection: 'ltr',
   },
   bottomPadding: {
     height: 40,
