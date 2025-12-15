@@ -52,8 +52,10 @@ export const PracticeScreen: React.FC<Props> = ({
 
   useEffect(() => {
     // Force RTL on every component mount to prevent layout flipping
-    I18nManager.allowRTL(true);
-    I18nManager.forceRTL(true);
+    if (!I18nManager.isRTL) {
+      I18nManager.allowRTL(true);
+      I18nManager.forceRTL(true);
+    }
     
     loadFirstExercise();
     loadIncentiveData();
@@ -251,9 +253,10 @@ export const PracticeScreen: React.FC<Props> = ({
       
       // If double points was rolled but we're showing another incentive,
       // we still set it for next question (just don't show the popup)
+      // Note: We don't call setHasDoublePoints(true) here because it will be
+      // updated automatically when the next question loads
       if (shouldShowDoublePoints) {
-        setDoublePointsForNextQuestion(true);
-        setHasDoublePoints(true);
+        await setDoublePointsForNextQuestion(true);
       }
     } else {
       // Show regular feedback (for wrong answers or correct without incentive)

@@ -117,8 +117,10 @@ export const ReportScreen: React.FC<Props> = ({ user, appData, onBack }) => {
   // Handle Android back button and force RTL
   useEffect(() => {
     // Force RTL on every component mount to prevent layout flipping
-    I18nManager.allowRTL(true);
-    I18nManager.forceRTL(true);
+    if (!I18nManager.isRTL) {
+      I18nManager.allowRTL(true);
+      I18nManager.forceRTL(true);
+    }
     
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       onBack();
@@ -276,7 +278,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   statRow: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     justifyContent: 'space-between',
     marginBottom: 8,
   },
@@ -337,7 +339,7 @@ const styles = StyleSheet.create({
   },
   groupHeader: {
     padding: 16,
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
@@ -353,9 +355,10 @@ const styles = StyleSheet.create({
     writingDirection: 'rtl',
   },
   exercisesList: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     flexWrap: 'wrap',
     padding: 12,
+    justifyContent: 'flex-end',
   },
   exerciseItem: {
     backgroundColor: '#fff5f5',

@@ -23,8 +23,10 @@ export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport
   // Handle Android back button and force RTL
   useEffect(() => {
     // Force RTL on every component mount to prevent layout flipping
-    I18nManager.allowRTL(true);
-    I18nManager.forceRTL(true);
+    if (!I18nManager.isRTL) {
+      I18nManager.allowRTL(true);
+      I18nManager.forceRTL(true);
+    }
     
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       onBack();

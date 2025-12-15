@@ -23,8 +23,10 @@ export const RegistrationScreen: React.FC<Props> = ({ onRegister }) => {
 
   // Force RTL on component mount
   useEffect(() => {
-    I18nManager.allowRTL(true);
-    I18nManager.forceRTL(true);
+    if (!I18nManager.isRTL) {
+      I18nManager.allowRTL(true);
+      I18nManager.forceRTL(true);
+    }
   }, []);
 
   const handleSubmit = () => {
