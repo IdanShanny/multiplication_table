@@ -34,10 +34,11 @@ export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport
     return () => backHandler.remove();
   }, [onBack]);
 
-  const openWhatsApp = () => {
-    const phoneNumber = '972503337373';
-    const message = `היי עידן! 👋 אני משתמש/ת באפליקציית לוח הכפל`;
-    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+  const openEmail = () => {
+    const email = 'idan.shanny@gmail.com';
+    const subject = 'משוב על אפליקציית לוח הכפל';
+    const body = 'היי עידן! 👋\n\nאני משתמש/ת באפליקציית לוח הכפל ורציתי לשתף:\n\n';
+    const url = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     Linking.openURL(url);
   };
 
@@ -62,7 +63,7 @@ export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport
           >
             <Text style={styles.reportButtonIcon}>📊</Text>
             <Text style={styles.reportButtonText}>רוצים לראות איך {user.name} {user.gender === 'female' ? 'מתקדמת' : 'מתקדם'}?</Text>
-            <Text style={styles.reportButtonSubtext}>לחצו כאן לדו"ח מפורט</Text>
+            <Text style={styles.reportButtonSubtext}>לחצו כאן לצפייה בדו"ח מפורט</Text>
           </LinearGradient>
         </TouchableOpacity>
 
@@ -71,7 +72,7 @@ export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport
 
           <Text style={styles.sectionTitle}>💡 למה פיתחתי את האפליקציה?</Text>
           <Text style={styles.text}>
-            חיפשתי אפליקציה איכותית ללימוד לוח הכפל ולא מצאתי שום דבר רציני. רוב האפליקציות זורקות שאלות אקראיות בלי לוגיקה, או מלאות בפרסומות.
+            חיפשתי לנדב, הבן שלי, דרך איכותית ללימוד לוח הכפל ולא מצאתי שום דבר רציני. רוב האפליקציות זורקות שאלות אקראיות בלי לוגיקה, או מלאות בפרסומות.
           </Text>
           <View style={styles.highlightBox}>
             <Text style={styles.highlightText}>
@@ -84,7 +85,7 @@ export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport
             <Text style={styles.warningText}>לוח הכפל הוא תשתית בסיסית לכל הלמידה המתמטית.</Text>
           </View>
           <Text style={styles.text}>
-            כשמלמדים כפל ארוך, חילוק, שברים ואלגברה - ילד שלא שולט בלוח הכפל חייב להתרכז בחישובים הבסיסיים, ולכן מתקשה ללמוד את החומר החדש. זה כמו לנסות לקרוא ספר כשעדיין מתקשים לזהות אותיות.
+            כשמלמדים כפל ארוך, חילוק, שברים ואלגברה - ילד שלא שולט בלוח הכפל חייב להתרכז בחישובים הבסיסיים, ולכן מתקשה ללמוד את החומר החדש.
           </Text>
           <Text style={styles.text}>
             ילד ששולט בלוח הכפל באופן אוטומטי יכול להתמקד בהבנת הבעיה ובלמידת מושגים חדשים - ולא בחישובים.
@@ -118,8 +119,8 @@ export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport
           <Text style={styles.text}>
             <Text style={styles.bold}>כל תרגיל עובר בין הקבוצות באופן דינמי:</Text>
           </Text>
-          <Text style={styles.bulletText}>✅ ענה נכון ומהר? התרגיל יורד קבוצה (מופיע לעיתים רחוקות יותר)</Text>
-          <Text style={styles.bulletText}>❌ ענה לא נכון או לאט? התרגיל עולה קבוצה (מופיע יותר)</Text>
+          <Text style={styles.bulletText}>✅ ענה נכון ומהר? התרגיל יורד קבוצה (ולכן מופיע לעיתים רחוקות יותר)</Text>
+          <Text style={styles.bulletText}>❌ ענה לא נכון או לאט? התרגיל עולה קבוצה (ומופיע יותר)</Text>
 
           <View style={styles.highlightBox}>
             <Text style={styles.highlightText}>
@@ -130,25 +131,17 @@ export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport
             </Text>
           </View>
 
-          <Text style={styles.subSectionTitle}>🔄 חזרה מיידית על טעויות</Text>
           <Text style={styles.text}>
-            כשילד טועה, האפליקציה מציגה את התשובה הנכונה. <Text style={styles.bold}>אחרי שאלה אחת, התרגיל חוזר שוב</Text> - חזרה מרווחת שעוזרת לקליטת הידע.
+            כשהילד טועה בשאלה, התשובה הנכונה מופיעה ואותה שאלה תופיע שוב אחרי השאלה הבאה, כדי לעזור להפנמה ויישום.
           </Text>
-
-          <Text style={styles.subSectionTitle}>⏱️ מדידת מהירות</Text>
-          <Text style={styles.text}>
-            יש הבדל עצום בין ילד שעונה 7×8=56 אחרי 15 שניות לבין ילד שעונה תוך שנייה. <Text style={styles.bold}>רק שליטה אוטומטית עוזרת בלמידה מתקדמת.</Text>
-          </Text>
-          <Text style={styles.bulletText}>✅ תשובה נכונה מתחת ל-10 שניות = התרגיל יורד קבוצה</Text>
-          <Text style={styles.bulletText}>❌ תשובה שגויה או איטית (מעל 10 שניות) = התרגיל עולה קבוצה</Text>
 
           <Text style={styles.sectionTitle}>🎁 מערכת תמריצים</Text>
           <Text style={styles.text}>
-            כדי להפוך את התרגול למשהו שהילד <Text style={styles.bold}>רוצה</Text> לעשות ולא רק צריך, הוספנו מערכת תמריצים מגוונת:
+            כדי להפוך את התרגול למשהו שהילד רוצה לעשות ולא רק צריך, ישנה מערכת תמריצים מגוונת:
           </Text>
-          <Text style={styles.bulletText}>• <Text style={styles.bold}>ניקוד יומי</Text> - צבירת נקודות על תשובות נכונות, עם שיא יומי שמעודד שיפור</Text>
-          <Text style={styles.bulletText}>• <Text style={styles.bold}>בונוסים על רצפים</Text> - הישגים מיוחדים כשעונים נכון כמה פעמים ברצף</Text>
-          <Text style={styles.bulletText}>• <Text style={styles.bold}>הפתעות אקראיות</Text> - שאלות עם נקודות כפולות שמופיעות באופן בלתי צפוי</Text>
+          <Text style={styles.bulletText}>• ניקוד יומי - צבירת נקודות על תשובות נכונות, עם שיא יומי שמעודד שיפור</Text>
+          <Text style={styles.bulletText}>• בונוסים על רצפים - הישגים מיוחדים כשעונים נכון כמה פעמים ברצף</Text>
+          <Text style={styles.bulletText}>• הפתעות אקראיות - שאלות עם נקודות כפולות שמופיעות באופן בלתי צפוי</Text>
           <Text style={styles.text}>
             האלמנט המשחקי הזה יוצר מוטיבציה פנימית ומעודד תרגול יומי עצמאי.
           </Text>
@@ -188,51 +181,33 @@ export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport
           <Text style={styles.bulletText}>• מקום שקט - בלי הסחות דעת</Text>
           <Text style={styles.bulletText}>• זמן קבוע - למשל, כל יום אחרי הצהריים</Text>
 
-          <Text style={styles.sectionTitle}>✨ למה האפליקציה שונה?</Text>
-          <View style={styles.highlightBox}>
-            <Text style={styles.highlightText}>✅ למידה חכמה - כל תרגיל מותאם לרמת הילד</Text>
-            <Text style={styles.highlightText}>✅ מוטיבציה מובנית - ניקוד, הישגים, הפתעות</Text>
-            <Text style={styles.highlightText}>✅ כלי מעקב - דו"ח מפורט לזיהוי קשיים</Text>
-            <Text style={styles.highlightText}>✅ חינם לחלוטין - ללא פרסומות, ללא רכישות</Text>
-            <Text style={styles.highlightText}>✅ פרטיות מלאה - כל המידע נשמר רק במכשיר</Text>
-            <Text style={styles.highlightText}>✅ מבוסס על מחקר - למידה מרווחת, חזרה מיידית, מדידת מהירות</Text>
-          </View>
-
           <Text style={styles.sectionTitle}>🎯 סיכום</Text>
           <Text style={styles.text}>
-            לוח הכפל הוא תשתית קריטית להצלחה במתמטיקה. ילד ששולט בו באופן אוטומטי יכול להתמקד בלמידה של נושאים מתקדמים.
+            לוח הכפל הוא תשתית קריטית להצלחה במתמטיקה. האפליקציה הזו היא כלי למידה מצוין שמבוסס על עקרונות פדגוגיים נכונים: למידה מותאמת אישית, חזרה מרווחת, מדידת מהירות, מוטיבציה מובנית וכלי מעקב להורים - והכי חשוב, היא עובדת.
           </Text>
-          <View style={styles.highlightBox}>
-            <Text style={styles.highlightText}>
-              האפליקציה הזו היא כלי למידה רציני שמבוסס על עקרונות פדגוגיים נכונים: למידה מותאמת אישית, חזרה מרווחת, מדידת מהירות, מוטיבציה מובנית, וכלי מעקב להורים.
-            </Text>
-          </View>
-          <View style={styles.successBox}>
-            <Text style={styles.successTextLarge}>והכי חשוב - היא עובדת.</Text>
-          </View>
-          <Text style={styles.textCenter}>
-            תנו לילד שלכם 10 דקות ביום, עקבו אחרי ההתקדמות, ותראו איך תוך מספר שבועות הוא משיג שליטה מלאה בלוח הכפל.
+          <Text style={styles.text}>
+            תנו לילד שלכם 10 דקות ביום, עקבו אחרי ההתקדמות, ותראו כמה מהר הוא משיג שליטה מלאה בלוח הכפל.
           </Text>
 
           {/* Contact Section */}
           <View style={styles.contactSection}>
-            <Text style={styles.contactTitle}>יש לך רעיון? הצעה? הערה?</Text>
-            <TouchableOpacity style={styles.whatsappButton} onPress={openWhatsApp}>
+            <Text style={styles.contactTitle}>יש לכם רעיון? הצעה? הערה?</Text>
+            <TouchableOpacity style={styles.emailButton} onPress={openEmail}>
               <LinearGradient
-                colors={['#25D366', '#128C7E']}
+                colors={['#4285F4', '#34A853']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={styles.whatsappGradient}
+                style={styles.emailGradient}
               >
-                <Text style={styles.whatsappIcon}>💬</Text>
-                <Text style={styles.whatsappText}>שלח הודעה בווטסאפ</Text>
+                <Text style={styles.emailIcon}>✉️</Text>
+                <Text style={styles.emailText}>שלחו הודעה במייל</Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>
 
           <View style={styles.footer}>
             <Text style={styles.footerText}>בהצלחה!</Text>
-            <Text style={styles.footerAuthor}>עידן שני{'\n'}מפתח האפליקציה</Text>
+            <Text style={styles.footerAuthor}>עידן</Text>
           </View>
         </View>
       </ScrollView>
@@ -479,23 +454,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
   },
-  whatsappButton: {
+  emailButton: {
     borderRadius: 25,
     overflow: 'hidden',
     width: '100%',
   },
-  whatsappGradient: {
+  emailGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 15,
     paddingHorizontal: 30,
   },
-  whatsappIcon: {
+  emailIcon: {
     fontSize: 24,
     marginLeft: 10,
   },
-  whatsappText: {
+  emailText: {
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
