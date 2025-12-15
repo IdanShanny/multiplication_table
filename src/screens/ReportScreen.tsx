@@ -128,10 +128,11 @@ export const ReportScreen: React.FC<Props> = ({ user, appData, onBack }) => {
     return () => backHandler.remove();
   }, [onBack]);
 
-  const openWhatsApp = () => {
-    const phoneNumber = '972503337373';
-    const message = `היי עידן! 👋 אני משתמש/ת באפליקציית לוח הכפל`;
-    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+  const openEmail = () => {
+    const email = 'idan.shanny@gmail.com';
+    const subject = 'משוב על אפליקציית לוח הכפל';
+    const body = 'היי עידן! 👋\n\nאני משתמש/ת באפליקציית לוח הכפל ורציתי לשתף:\n\n';
+    const url = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     Linking.openURL(url);
   };
 
@@ -187,12 +188,21 @@ export const ReportScreen: React.FC<Props> = ({ user, appData, onBack }) => {
             total={allTimeStats.totalCount}
           />
 
-          {/* Feedback Button */}
-          <TouchableOpacity style={styles.feedbackButton} onPress={openWhatsApp}>
-            <Text style={styles.feedbackEmoji}>💬</Text>
-            <Text style={styles.feedbackText}>יש לך רעיון? הצעה? הערה?</Text>
-            <Text style={styles.feedbackSubtext}>לחץ כאן 🚀</Text>
-          </TouchableOpacity>
+          {/* Contact Section */}
+          <View style={styles.contactSection}>
+            <Text style={styles.contactTitle}>יש לכם רעיון? הצעה? הערה?</Text>
+            <TouchableOpacity style={styles.emailButton} onPress={openEmail}>
+              <LinearGradient
+                colors={['#4285F4', '#34A853']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.emailGradient}
+              >
+                <Text style={styles.emailIcon}>✉️</Text>
+                <Text style={styles.emailText}>שלחו הודעה במייל</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
 
           <View style={styles.bottomPadding} />
         </View>
@@ -363,33 +373,40 @@ const styles = StyleSheet.create({
   bottomPadding: {
     height: 40,
   },
-  feedbackButton: {
-    backgroundColor: '#25D366',  // Keeping WhatsApp green for brand recognition
-    borderRadius: 16,
+  contactSection: {
+    marginTop: 30,
     padding: 20,
-    marginTop: 24,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 15,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
   },
-  feedbackEmoji: {
-    fontSize: 36,
-    marginBottom: 8,
+  contactTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+    textAlign: 'center',
   },
-  feedbackText: {
+  emailButton: {
+    borderRadius: 25,
+    overflow: 'hidden',
+    width: '100%',
+  },
+  emailGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+  },
+  emailIcon: {
+    fontSize: 24,
+    marginLeft: 10,
+  },
+  emailText: {
     color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  feedbackSubtext: {
-    color: 'rgba(255, 255, 255, 0.9)',
-    fontSize: 14,
-    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 

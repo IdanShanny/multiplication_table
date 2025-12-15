@@ -76,7 +76,7 @@ export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport
           </Text>
           <View style={styles.highlightBox}>
             <Text style={styles.highlightText}>
-              אז פיתחתי אפליקציה שבאמת עובדת - מבוססת על עקרונות פדגוגיים נכונים, נקייה מפרסומות, וממוקדת ב-100% בלמידה.
+              אז פיתחתי אפליקציה שבאמת עובדת - מבוססת על עקרונות פדגוגיים נכונים, נקייה מפרסומות וממוקדת ב-100% בלמידה.
             </Text>
           </View>
 
@@ -96,7 +96,7 @@ export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport
           <Text style={styles.subSectionTitle}>🎯 למידה מותאמת אישית</Text>
           <View style={styles.infoBox}>
             <Text style={styles.infoText}>
-              הבעיה באפליקציות רגילות: שאלות אקראיות. ילד עונה נכון על 7×8, ואז לא רואה את זה שוב במשך 50 שאלות.
+              הבעיה באפליקציות רגילות: שאלות אקראיות. ילד מקבל את 7×6, ואז לא רואה את אותו תרגיל שוב הרבה זמן.
             </Text>
           </View>
           <Text style={styles.text}>
@@ -137,7 +137,7 @@ export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport
 
           <Text style={styles.sectionTitle}>🎁 מערכת תמריצים</Text>
           <Text style={styles.text}>
-            כדי להפוך את התרגול למשהו שהילד רוצה לעשות ולא רק צריך, ישנה מערכת תמריצים מגוונת:
+            כדי להפוך את התרגול למשהו שהילד <Text style={styles.emphasizedText}>רוצה לעשות, ולא רק צריך</Text>, ישנה מערכת תמריצים מגוונת:
           </Text>
           <Text style={styles.bulletText}>• ניקוד יומי - צבירת נקודות על תשובות נכונות, עם שיא יומי שמעודד שיפור</Text>
           <Text style={styles.bulletText}>• בונוסים על רצפים - הישגים מיוחדים כשעונים נכון כמה פעמים ברצף</Text>
@@ -319,6 +319,11 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     color: '#333',
     marginBottom: 12,
+  },
+  emphasizedText: {
+    fontWeight: 'bold',
+    color: '#e74c3c',
+    fontSize: 17,
   },
   textCenter: {
     fontSize: 16,
