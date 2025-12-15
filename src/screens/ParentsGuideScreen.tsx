@@ -8,6 +8,7 @@ import {
   Platform,
   Linking,
   BackHandler,
+  I18nManager,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { User } from '../types';
@@ -19,8 +20,12 @@ interface Props {
 }
 
 export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport }) => {
-  // Handle Android back button
+  // Handle Android back button and force RTL
   useEffect(() => {
+    // Force RTL on every component mount to prevent layout flipping
+    I18nManager.allowRTL(true);
+    I18nManager.forceRTL(true);
+    
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       onBack();
       return true;
@@ -254,11 +259,13 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: '600',
+    writingDirection: 'rtl',
   },
   headerTitle: {
     color: 'white',
     fontSize: 22,
     fontWeight: 'bold',
+    writingDirection: 'rtl',
   },
   placeholder: {
     width: 50,

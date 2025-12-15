@@ -8,6 +8,7 @@ import {
   Platform,
   Linking,
   BackHandler,
+  I18nManager,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppData, Exercise, User } from '../types';
@@ -113,8 +114,12 @@ export const ReportScreen: React.FC<Props> = ({ user, appData, onBack }) => {
   const allTimeStats = getAllTimeStats(appData.results);
   const exercisesByGroup = getExercisesByGroup(appData);
 
-  // Handle Android back button
+  // Handle Android back button and force RTL
   useEffect(() => {
+    // Force RTL on every component mount to prevent layout flipping
+    I18nManager.allowRTL(true);
+    I18nManager.forceRTL(true);
+    
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       onBack();
       return true; // Prevent default behavior
@@ -218,6 +223,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+    writingDirection: 'rtl',
   },
   headerTitle: {
     color: 'white',
@@ -226,6 +232,7 @@ const styles = StyleSheet.create({
     marginLeft: 16,
     flex: 1,
     textAlign: 'center',
+    writingDirection: 'rtl',
   },
   scrollView: {
     flex: 1,

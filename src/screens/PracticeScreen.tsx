@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  I18nManager,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppData, Exercise, ExerciseResult, User, DELAY_THRESHOLD } from '../types';
@@ -50,6 +51,10 @@ export const PracticeScreen: React.FC<Props> = ({
   const isFirstLoad = useRef(true);
 
   useEffect(() => {
+    // Force RTL on every component mount to prevent layout flipping
+    I18nManager.allowRTL(true);
+    I18nManager.forceRTL(true);
+    
     loadFirstExercise();
     loadIncentiveData();
   }, []);
@@ -482,6 +487,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 22,
     fontWeight: '600',
+    writingDirection: 'rtl',
   },
   reportButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
@@ -493,6 +499,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+    writingDirection: 'rtl',
   },
   scoreContainer: {
     flexDirection: 'row',

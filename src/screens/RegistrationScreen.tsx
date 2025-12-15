@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  I18nManager,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Gender, User } from '../types';
@@ -19,6 +20,12 @@ export const RegistrationScreen: React.FC<Props> = ({ onRegister }) => {
   const [name, setName] = useState('');
   const [gender, setGender] = useState<Gender | null>(null);
   const [error, setError] = useState('');
+
+  // Force RTL on component mount
+  useEffect(() => {
+    I18nManager.allowRTL(true);
+    I18nManager.forceRTL(true);
+  }, []);
 
   const handleSubmit = () => {
     if (!name.trim()) {
