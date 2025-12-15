@@ -212,6 +212,10 @@ export const PracticeScreen: React.FC<Props> = ({
     // Update streak and check for achievements
     const streakResult = await updateStreak(isCorrect && isFast);
     
+    // Randomly determine if next question should have double points (10% chance)
+    // This happens ALWAYS, regardless of other incentives, to maintain uniform 10% probability
+    const shouldShowDoublePoints = Math.random() < 0.1;
+    
     // Check if we need to show incentive popup (only for correct answers)
     const hasStreakAchievement = streakResult.achievementReached;
     const hasRecordPopup = scoreResult.shouldShowRecordPopup;
@@ -244,6 +248,13 @@ export const PracticeScreen: React.FC<Props> = ({
         });
         setShowIncentivePopup(true);
       }
+      
+      // If double points was rolled but we're showing another incentive,
+      // we still set it for next question (just don't show the popup)
+      if (shouldShowDoublePoints) {
+        setDoublePointsForNextQuestion(true);
+        setHasDoublePoints(true);
+      }
     } else {
       // Show regular feedback (for wrong answers or correct without incentive)
       const messages = isCorrect
@@ -266,8 +277,7 @@ export const PracticeScreen: React.FC<Props> = ({
         tension: 40,
         useNativeDriver: true,
       }).start(() => {
-        // After regular feedback, randomly show double points popup (10% chance)
-        const shouldShowDoublePoints = Math.random() < 0.1;
+        // After regular feedback, show double points popup if it was determined earlier
         if (shouldShowDoublePoints) {
           setDoublePointsForNextQuestion(true);
           setHasDoublePoints(true);
