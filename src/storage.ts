@@ -44,6 +44,16 @@ const getDefaultIncentiveData = () => {
     lastStreakDate: today,
     firstUsageDate: today,
     nextQuestionDoublePoints: false,
+    totalPoints: 0,
+  };
+};
+
+const getDefaultCharacterData = () => {
+  return {
+    currentCharacter: {
+      stage: 0 as 0 | 1 | 2 | 3,
+    },
+    completedCharacters: [],
   };
 };
 
@@ -54,6 +64,7 @@ const getDefaultAppData = (): AppData => ({
   lastWrongExercise: null,
   showWrongExerciseNext: false,
   incentive: getDefaultIncentiveData(),
+  character: getDefaultCharacterData(),
 });
 
 // Migrate and validate stored data to ensure compatibility with current version
@@ -68,6 +79,7 @@ const migrateAppData = (parsed: any): AppData => {
     lastWrongExercise: null,
     showWrongExerciseNext: false,
     incentive: defaultData.incentive,
+    character: defaultData.character,
   };
   
   // Migrate user data
@@ -122,6 +134,7 @@ const migrateAppData = (parsed: any): AppData => {
     const today = new Date().toISOString().split('T')[0];
     const storedDate = parsed.incentive.lastScoreDate;
     const firstUsageDate = typeof parsed.incentive.firstUsageDate === 'string' ? parsed.incentive.firstUsageDate : today;
+    const totalPoints = typeof parsed.incentive.totalPoints === 'number' ? parsed.incentive.totalPoints : 0;
     
     // Reset daily score if it's a new day
     if (storedDate === today) {
@@ -134,9 +147,10 @@ const migrateAppData = (parsed: any): AppData => {
         lastStreakDate: typeof parsed.incentive.lastStreakDate === 'string' ? parsed.incentive.lastStreakDate : today,
         firstUsageDate: firstUsageDate,
         nextQuestionDoublePoints: typeof parsed.incentive.nextQuestionDoublePoints === 'boolean' ? parsed.incentive.nextQuestionDoublePoints : false,
+        totalPoints: totalPoints,
       };
     } else {
-      // New day - reset daily score but keep high score
+      // New day - reset daily score but keep high score and total points
       migrated.incentive = {
         dailyScore: 0,
         highScore: typeof parsed.incentive.highScore === 'number' ? parsed.incentive.highScore : 0,
@@ -146,7 +160,33 @@ const migrateAppData = (parsed: any): AppData => {
         lastStreakDate: today,
         firstUsageDate: firstUsageDate,
         nextQuestionDoublePoints: false,
+        totalPoints: totalPoints,
       };
+    }
+  }
+  
+  // Migrate character data
+  if (parsed.character && typeof parsed.character === 'object') {
+    if (parsed.character.currentCharacter && typeof parsed.character.currentCharacter === 'object') {
+      const stage = parsed.character.currentCharacter.stage;
+      if (typeof stage === 'number' && stage >= 0 && stage <= 3) {
+        migrated.character.currentCharacter = {
+          stage: stage as 0 | 1 | 2 | 3,
+          color: parsed.character.currentCharacter.color,
+          skin: parsed.character.currentCharacter.skin,
+          animation: parsed.character.currentCharacter.animation,
+        };
+      }
+    }
+    if (Array.isArray(parsed.character.completedCharacters)) {
+      migrated.character.completedCharacters = parsed.character.completedCharacters.filter((c: any) =>
+        c && typeof c === 'object' &&
+        typeof c.id === 'string' &&
+        typeof c.color === 'string' &&
+        typeof c.skin === 'string' &&
+        typeof c.animation === 'string' &&
+        typeof c.completedAt === 'number'
+      );
     }
   }
   
@@ -262,6 +302,11 @@ export const updateDailyScore = async (points: number): Promise<{ newScore: numb
   }
   
   data.incentive.dailyScore += points;
+  // Update total points (only add positive points)
+  if (points > 0) {
+    data.incentive.totalPoints += points;
+  }
+  
   const newScore = data.incentive.dailyScore;
   let isNewRecord = false;
   let shouldShowRecordPopup = false;
@@ -338,4 +383,71 @@ export const checkAndConsumeDoublePoints = async (): Promise<boolean> => {
     await saveAppData(data);
   }
   return hasDoublePoints;
+};
+
+// Character-related functions
+export const getCharacterData = async () => {
+  const data = await loadAppData();
+  return data.character;
+};
+
+export const getCurrentCharacterStage = async () => {
+  const data = await loadAppData();
+  return data.character.currentCharacter.stage;
+};
+
+export const getPointsForNextStage = (currentStage: 0 | 1 | 2 | 3): number => {
+  // Each stage requires 30 points
+  return (currentStage + 1) * 30;
+};
+
+export const updateCharacterColor = async (color: 'white' | 'brown' | 'skin'): Promise<void> => {
+  const data = await loadAppData();
+  data.character.currentCharacter.color = color;
+  data.character.currentCharacter.stage = 1;
+  await saveAppData(data);
+};
+
+export const updateCharacterSkin = async (skin: 'winter' | 'festive' | 'summer'): Promise<void> => {
+  const data = await loadAppData();
+  data.character.currentCharacter.skin = skin;
+  data.character.currentCharacter.stage = 2;
+  await saveAppData(data);
+};
+
+export const updateCharacterAnimation = async (animation: 'jump' | 'smile' | 'spin'): Promise<void> => {
+  const data = await loadAppData();
+  data.character.currentCharacter.animation = animation;
+  data.character.currentCharacter.stage = 3;
+  await saveAppData(data);
+};
+
+export const completeCharacter = async (): Promise<void> => {
+  const data = await loadAppData();
+  const current = data.character.currentCharacter;
+  
+  if (current.stage === 3 && current.color && current.skin && current.animation) {
+    // Save completed character
+    const completedCharacter = {
+      id: Date.now().toString(),
+      color: current.color,
+      skin: current.skin,
+      animation: current.animation,
+      completedAt: Date.now(),
+    };
+    
+    data.character.completedCharacters.push(completedCharacter);
+    
+    // Reset current character
+    data.character.currentCharacter = {
+      stage: 0,
+    };
+    
+    await saveAppData(data);
+  }
+};
+
+export const getCompletedCharacters = async () => {
+  const data = await loadAppData();
+  return data.character.completedCharacters;
 };

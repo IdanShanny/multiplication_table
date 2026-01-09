@@ -14,7 +14,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppData, Exercise, ExerciseResult, User, DELAY_THRESHOLD } from '../types';
 import { selectNextExercise } from '../exerciseLogic';
-import { saveExerciseResult, loadAppData, saveAppData, updateDailyScore, updateStreak, getIncentiveData, setDoublePointsForNextQuestion, checkAndConsumeDoublePoints } from '../storage';
+import { saveExerciseResult, loadAppData, saveAppData, updateDailyScore, updateStreak, getIncentiveData, setDoublePointsForNextQuestion, checkAndConsumeDoublePoints, getCharacterData, getPointsForNextStage } from '../storage';
 import { getCorrectMessages, getWrongMessages, getRandomMessage, getCorrectAnswerString } from '../messages';
 import { IncentivePopup } from '../components/IncentivePopup';
 
@@ -23,6 +23,7 @@ interface Props {
   appData: AppData;
   onDataUpdate: (data: AppData) => void;
   onShowParentsGuide: () => void;
+  onShowCharacter: () => void;
 }
 
 export const PracticeScreen: React.FC<Props> = ({
@@ -30,6 +31,7 @@ export const PracticeScreen: React.FC<Props> = ({
   appData,
   onDataUpdate,
   onShowParentsGuide,
+  onShowCharacter,
 }) => {
   const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
   const [answer, setAnswer] = useState('');
@@ -41,9 +43,10 @@ export const PracticeScreen: React.FC<Props> = ({
   const [dailyScore, setDailyScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
   const [showIncentivePopup, setShowIncentivePopup] = useState(false);
-  const [incentivePopupType, setIncentivePopupType] = useState<'record' | 'streak' | 'doublePoints'>('record');
+  const [incentivePopupType, setIncentivePopupType] = useState<'record' | 'streak' | 'doublePoints' | 'stageUp'>('record');
   const [incentivePopupData, setIncentivePopupData] = useState<any>(null);
   const [hasDoublePoints, setHasDoublePoints] = useState(false);
+  const [pendingDoublePoints, setPendingDoublePoints] = useState(false);
   
   const feedbackAnim = useRef(new Animated.Value(0)).current;
   const exerciseAnim = useRef(new Animated.Value(1)).current;
@@ -196,7 +199,7 @@ export const PracticeScreen: React.FC<Props> = ({
     const isFast = responseTime < DELAY_THRESHOLD;
     
     if (isCorrect) {
-      points = isFast ? 3 : 1;
+      points = isFast ? 3 : 2;
     } else {
       points = -1;
     }
@@ -218,14 +221,27 @@ export const PracticeScreen: React.FC<Props> = ({
     // This happens ALWAYS, regardless of other incentives, to maintain uniform 10% probability
     const shouldShowDoublePoints = Math.random() < 0.1;
     
+    // Check if character leveled up
+    const characterData = await getCharacterData();
+    const currentStage = characterData.currentCharacter.stage;
+    const totalPoints = (await getIncentiveData()).totalPoints;
+    const pointsForNextStage = getPointsForNextStage(currentStage);
+    const hasLeveledUp = totalPoints >= pointsForNextStage && currentStage < 3;
+    
     // Check if we need to show incentive popup (only for correct answers)
     const hasStreakAchievement = streakResult.achievementReached;
     const hasRecordPopup = scoreResult.shouldShowRecordPopup;
-    const showIncentive = isCorrect && (hasStreakAchievement || hasRecordPopup);
+    const showIncentive = isCorrect && (hasStreakAchievement || hasRecordPopup || hasLeveledUp);
     
     // If showing incentive popup, skip the regular feedback and show popup directly
     if (showIncentive) {
       setShowingFeedback(true);
+      
+      // Store double points for later (will be shown after stage up)
+      if (shouldShowDoublePoints) {
+        setPendingDoublePoints(true);
+        await setDoublePointsForNextQuestion(true);
+      }
       
       if (hasStreakAchievement) {
         // Add bonus points for streak achievement
@@ -241,22 +257,26 @@ export const PracticeScreen: React.FC<Props> = ({
         setIncentivePopupData({
           streakCount: streakResult.achievementReached,
           bonusPoints: bonusPoints,
+          hasLeveledUp: hasLeveledUp,
+          currentStage: currentStage,
         });
         setShowIncentivePopup(true);
       } else if (hasRecordPopup) {
         setIncentivePopupType('record');
         setIncentivePopupData({
           newScore: scoreResult.newScore,
+          hasLeveledUp: hasLeveledUp,
+          currentStage: currentStage,
         });
         setShowIncentivePopup(true);
-      }
-      
-      // If double points was rolled but we're showing another incentive,
-      // we still set it for next question (just don't show the popup)
-      // Note: We don't call setHasDoublePoints(true) here because it will be
-      // updated automatically when the next question loads
-      if (shouldShowDoublePoints) {
-        await setDoublePointsForNextQuestion(true);
+      } else if (hasLeveledUp) {
+        // Only stage up popup
+        setIncentivePopupType('stageUp');
+        setIncentivePopupData({
+          currentStage: currentStage,
+          totalPoints: totalPoints,
+        });
+        setShowIncentivePopup(true);
       }
     } else {
       // Show regular feedback (for wrong answers or correct without incentive)
@@ -301,10 +321,37 @@ export const PracticeScreen: React.FC<Props> = ({
     }
   };
 
-  const handleIncentiveContinue = () => {
+  const handleIncentiveContinue = async () => {
+    const currentType = incentivePopupType;
+    const currentData = incentivePopupData;
+    
     setShowIncentivePopup(false);
-    // Now load the new exercise
-    selectNewExercise();
+    
+    // Check if we need to show stage up popup after streak/record
+    if ((currentType === 'streak' || currentType === 'record') && currentData?.hasLeveledUp) {
+      // Show stage up popup next
+      const incentiveData = await getIncentiveData();
+      setTimeout(() => {
+        setIncentivePopupType('stageUp');
+        setIncentivePopupData({
+          currentStage: currentData.currentStage,
+          totalPoints: incentiveData.totalPoints,
+        });
+        setShowIncentivePopup(true);
+      }, 300);
+    } else if (currentType === 'stageUp' && pendingDoublePoints) {
+      // After stage up, show double points if pending
+      setPendingDoublePoints(false);
+      setTimeout(() => {
+        setHasDoublePoints(true);
+        setIncentivePopupType('doublePoints');
+        setIncentivePopupData({});
+        setShowIncentivePopup(true);
+      }, 300);
+    } else {
+      // No more popups, load new exercise
+      selectNewExercise();
+    }
   };
 
   if (!currentExercise) {
@@ -329,9 +376,14 @@ export const PracticeScreen: React.FC<Props> = ({
         >
           {/* Header */}
           <View style={styles.header}>
-            <TouchableOpacity style={styles.reportButton} onPress={onShowParentsGuide}>
-              <Text style={styles.reportButtonText}>👨‍👩‍👧 להורים</Text>
-            </TouchableOpacity>
+            <View style={styles.headerButtons}>
+              <TouchableOpacity style={styles.reportButton} onPress={onShowParentsGuide}>
+                <Text style={styles.reportButtonText}>👨‍👩‍👧 להורים</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.characterButton} onPress={onShowCharacter}>
+                <Text style={styles.characterButtonText}>👤 הדמות שלי</Text>
+              </TouchableOpacity>
+            </View>
             <Text style={styles.greeting}>שלום, {user.name}! 👋</Text>
           </View>
 
@@ -496,6 +548,10 @@ const styles = StyleSheet.create({
     marginTop: Platform.OS === 'ios' ? 40 : 20,
     marginBottom: 12,
   },
+  headerButtons: {
+    flexDirection: 'column',
+    gap: 8,
+  },
   greeting: {
     color: 'white',
     fontSize: 22,
@@ -509,6 +565,18 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   reportButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    writingDirection: 'rtl',
+  },
+  characterButton: {
+    backgroundColor: 'rgba(155, 89, 182, 0.8)',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  characterButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '600',

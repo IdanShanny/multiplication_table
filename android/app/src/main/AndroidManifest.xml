@@ -24,7 +24,7 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="com.multiplication.table"/>
+        <data android:scheme="com.idanshanny.multiplicationtable"/>
       </intent-filter>
     </activity>
   </application>

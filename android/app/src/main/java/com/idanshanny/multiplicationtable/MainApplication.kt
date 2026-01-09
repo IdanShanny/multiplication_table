@@ -1,4 +1,4 @@
-package com.multiplication.table
+package com.idanshanny.multiplicationtable
 
 import android.app.Application
 import android.content.res.Configuration
