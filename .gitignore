@@ -1,5 +1,8 @@
 node_modules
 
+# Expo web export (built on Render)
+dist/
+
 # Android build outputs
 android/app/build/
 android/build/

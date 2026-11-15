@@ -7,7 +7,12 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "EXPO_NO_DEPENDENCY_VALIDATION=1 expo start --web",
-    "build:android": "eas build -p android --profile preview"
+    "build:android": "eas build -p android --profile preview",
+    "render:build": "sh scripts/render-build.sh",
+    "render:start": "sh scripts/render-start.sh"
+  },
+  "engines": {
+    "node": ">=20 <23"
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
@@ -16,6 +21,7 @@
     "expo-asset": "~11.0.1",
     "expo-linear-gradient": "~14.0.1",
     "expo-status-bar": "~2.0.1",
+    "express": "^5.3.0",
     "react": "18.3.1",
     "react-dom": "^18.3.1",
     "react-native": "0.76.9",
