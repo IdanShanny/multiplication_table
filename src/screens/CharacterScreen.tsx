@@ -28,6 +28,41 @@ interface Props {
 
 type SelectionMode = 'none' | 'color' | 'skin' | 'animation';
 
+function getCharacterVisualEmojis(
+  color?: CharacterColor,
+  skin?: CharacterSkin
+): { body: string; outfit: string } {
+  let body = '👤';
+  if (color) {
+    switch (color) {
+      case 'white':
+        body = '👱';
+        break;
+      case 'brown':
+        body = '👨🏾';
+        break;
+      case 'skin':
+        body = '👨';
+        break;
+    }
+  }
+  let outfit = '';
+  if (skin) {
+    switch (skin) {
+      case 'winter':
+        outfit = '🧥';
+        break;
+      case 'festive':
+        outfit = '🎩';
+        break;
+      case 'summer':
+        outfit = '👕';
+        break;
+    }
+  }
+  return { body, outfit };
+}
+
 export const CharacterScreen: React.FC<Props> = ({ user, onBack }) => {
   const [currentCharacter, setCurrentCharacter] = useState<CharacterStage>({ stage: 0 });
   const [completedCharacters, setCompletedCharacters] = useState<CompletedCharacter[]>([]);
@@ -140,29 +175,10 @@ export const CharacterScreen: React.FC<Props> = ({ user, onBack }) => {
 
   const renderCharacter = () => {
     const stage = currentCharacter.stage;
-    
-    // Character emoji based on stage
-    let characterEmoji = '👤'; // Gray silhouette for stage 0
-    
-    if (stage >= 1 && currentCharacter.color) {
-      // Stage 1+: Colored character
-      switch (currentCharacter.color) {
-        case 'white': characterEmoji = '👱'; break;
-        case 'brown': characterEmoji = '👨🏾'; break;
-        case 'skin': characterEmoji = '👨'; break;
-      }
-    }
-    
-    // Add clothing/skin for stage 2+
-    let skinEmoji = '';
-    if (stage >= 2 && currentCharacter.skin) {
-      switch (currentCharacter.skin) {
-        case 'winter': skinEmoji = '🧥'; break;
-        case 'festive': skinEmoji = '🎩'; break;
-        case 'summer': skinEmoji = '👕'; break;
-      }
-    }
-    
+    const color = stage >= 1 ? currentCharacter.color : undefined;
+    const skin = stage >= 2 ? currentCharacter.skin : undefined;
+    const { body: characterEmoji, outfit: skinEmoji } = getCharacterVisualEmojis(color, skin);
+
     // Animation for stage 3+
     const shouldAnimate = stage >= 3 && currentCharacter.animation;
     const rotation = shouldAnimate ? animValue.interpolate({
@@ -331,6 +347,19 @@ export const CharacterScreen: React.FC<Props> = ({ user, onBack }) => {
     );
   };
 
+  const renderCompletedCharacterPreview = (char: CompletedCharacter) => {
+    const { body, outfit } = getCharacterVisualEmojis(char.color, char.skin);
+    return (
+      <View style={styles.completedThumb}>
+        <Text style={styles.completedThumbBody}>{body}</Text>
+        {outfit ? <Text style={styles.completedThumbOutfit}>{outfit}</Text> : null}
+        {char.animation === 'smile' && (
+          <Text style={styles.completedThumbSmile}>😊</Text>
+        )}
+      </View>
+    );
+  };
+
   const renderCompletedCharacters = () => {
     if (!showCompletedList) return null;
 
@@ -344,12 +373,18 @@ export const CharacterScreen: React.FC<Props> = ({ user, onBack }) => {
             ) : (
               completedCharacters.map((char) => (
                 <View key={char.id} style={styles.completedCharacterItem}>
-                  <Text style={styles.completedCharacterText}>
-                    {getColorName(char.color)} • {getSkinName(char.skin)} • {getAnimationName(char.animation)}
-                  </Text>
-                  <Text style={styles.completedCharacterDate}>
-                    {new Date(char.completedAt).toLocaleDateString('he-IL')}
-                  </Text>
+                  <View style={styles.completedCharacterRow}>
+                    <View style={styles.completedCharacterMeta}>
+                      <Text style={styles.completedCharacterText}>
+                        {getColorName(char.color)} • {getSkinName(char.skin)} •{' '}
+                        {getAnimationName(char.animation)}
+                      </Text>
+                      <Text style={styles.completedCharacterDate}>
+                        {new Date(char.completedAt).toLocaleDateString('he-IL')}
+                      </Text>
+                    </View>
+                    {renderCompletedCharacterPreview(char)}
+                  </View>
                 </View>
               ))
             )}
@@ -615,6 +650,39 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
+  },
+  completedCharacterRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  completedCharacterMeta: {
+    flex: 1,
+  },
+  completedThumb: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 72,
+    minHeight: 72,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 4,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  completedThumbBody: {
+    fontSize: 40,
+  },
+  completedThumbOutfit: {
+    fontSize: 22,
+    marginTop: -16,
+  },
+  completedThumbSmile: {
+    fontSize: 18,
+    position: 'absolute',
+    bottom: 2,
+    left: 4,
   },
   completedCharacterText: {
     fontSize: 16,
