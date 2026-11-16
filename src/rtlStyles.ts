@@ -6,9 +6,9 @@ export const rtlText: TextStyle = {
   writingDirection: 'rtl',
 };
 
-/** Text fields with Hebrew placeholders */
+/** Text fields: RTL text, centered in the box (placeholder + value) */
 export const rtlInput: TextStyle = {
-  textAlign: 'right',
+  textAlign: 'center',
   writingDirection: 'rtl',
 };
 
