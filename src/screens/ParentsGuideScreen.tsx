@@ -15,7 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { User } from '../types';
 import { rtlHeaderRow, rtlText } from '../rtlStyles';
 
-const RESET_COUNTDOWN_SECONDS = 5;
+const RESET_COUNTDOWN_SECONDS = 10;
 
 interface Props {
   user: User;
