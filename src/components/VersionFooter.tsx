@@ -42,12 +42,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     alignItems: 'center',
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(255, 255, 255, 0.35)',
-    backgroundColor: 'rgba(0, 0, 0, 0.12)',
+    borderTopColor: 'rgba(255, 255, 255, 0.25)',
+    backgroundColor: 'rgba(0, 0, 0, 0.48)',
   },
   text: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.85)',
+    color: 'rgba(255, 255, 255, 0.95)',
     writingDirection: 'rtl',
   },
 });
