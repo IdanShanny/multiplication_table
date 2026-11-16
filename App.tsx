@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { StatusBar } from 'expo-status-bar';
 import { View, StyleSheet, I18nManager, Platform } from 'react-native';
+import { AppShell } from './src/AppShell';
 import { RegistrationScreen } from './src/screens/RegistrationScreen';
 import { PracticeScreen } from './src/screens/PracticeScreen';
 import { ReportScreen } from './src/screens/ReportScreen';
@@ -66,63 +66,55 @@ export default function App() {
 
   if (screen === 'loading' || !appData) {
     return (
-      <View style={styles.container}>
-        <StatusBar style="light" />
-      </View>
+      <AppShell>
+        <View style={styles.container} />
+      </AppShell>
     );
   }
 
   if (screen === 'registration') {
     return (
-      <>
-        <StatusBar style="light" />
+      <AppShell>
         <RegistrationScreen onRegister={handleRegister} />
-      </>
+      </AppShell>
     );
   }
 
   if (screen === 'parentsGuide' && appData.user) {
     return (
-      <>
-        <StatusBar style="light" />
+      <AppShell>
         <ParentsGuideScreen
           user={appData.user}
           onBack={handleBackToPractice}
           onShowReport={handleShowReport}
         />
-      </>
+      </AppShell>
     );
   }
 
   if (screen === 'report' && appData.user) {
     return (
-      <>
-        <StatusBar style="light" />
+      <AppShell>
         <ReportScreen
           user={appData.user}
           appData={appData}
           onBack={handleBackToPractice}
         />
-      </>
+      </AppShell>
     );
   }
 
   if (screen === 'character' && appData.user) {
     return (
-      <>
-        <StatusBar style="light" />
-        <CharacterScreen
-          user={appData.user}
-          onBack={handleBackToPractice}
-        />
-      </>
+      <AppShell>
+        <CharacterScreen user={appData.user} onBack={handleBackToPractice} />
+      </AppShell>
     );
   }
 
   if (appData.user) {
     return (
-      <>
-        <StatusBar style="light" />
+      <AppShell>
         <PracticeScreen
           user={appData.user}
           appData={appData}
@@ -130,7 +122,7 @@ export default function App() {
           onShowParentsGuide={handleShowParentsGuide}
           onShowCharacter={handleShowCharacter}
         />
-      </>
+      </AppShell>
     );
   }
 

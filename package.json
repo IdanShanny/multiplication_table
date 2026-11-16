@@ -1,6 +1,6 @@
 {
   "name": "multiplication-table",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "main": "expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
@@ -9,7 +9,8 @@
     "web": "EXPO_NO_DEPENDENCY_VALIDATION=1 expo start --web",
     "build:android": "eas build -p android --profile preview",
     "render:build": "sh scripts/render-build.sh",
-    "render:start": "sh scripts/render-start.sh"
+    "render:start": "sh scripts/render-start.sh",
+    "version:bump": "sh scripts/bump-version.sh"
   },
   "engines": {
     "node": ">=20 <23"

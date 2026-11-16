@@ -61,6 +61,12 @@ npx expo start
 
 Scan the QR code with Expo Go app on your Android device.
 
+## Versioning
+
+- **Source of truth:** `package.json` `version` and `app.json` → `expo.version` (keep equal).
+- **On screen:** footer shows `גרסה X`; on web it loads `X` from `/api/health` (Render server) after deploy.
+- **Bump:** `npm run version:bump -- 1.2.1` then commit, push, and redeploy.
+
 ## App Logic
 
 ### Exercise Groups (1-4)
