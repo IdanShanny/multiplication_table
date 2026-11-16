@@ -15,7 +15,16 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { AppData, Exercise, ExerciseResult, User, DELAY_THRESHOLD } from '../types';
 import { selectNextExercise } from '../exerciseLogic';
 import { rtlHeaderRow, rtlInput, rtlText } from '../rtlStyles';
-import { saveExerciseResult, loadAppData, saveAppData, updateDailyScore, updateStreak, setDoublePointsForNextQuestion, checkAndConsumeDoublePoints } from '../storage';
+import {
+  saveExerciseResult,
+  loadAppData,
+  saveAppData,
+  updateDailyScore,
+  updateStreak,
+  getIncentiveData,
+  setDoublePointsForNextQuestion,
+  checkAndConsumeDoublePoints,
+} from '../storage';
 import { getCorrectMessages, getWrongMessages, getRandomMessage, getCorrectAnswerString } from '../messages';
 import { IncentivePopup } from '../components/IncentivePopup';
 
@@ -115,31 +124,36 @@ export const PracticeScreen: React.FC<Props> = ({
       setShowingFeedback(false);
       setFeedback(null);
       
-      // Animate out old exercise
-      Animated.timing(exerciseAnim, {
-        toValue: 0,
-        duration: 150,
-        useNativeDriver: true,
-      }).start(() => {
+      const nativeDriver = Platform.OS !== 'web';
+      const showNextExercise = () => {
         setCurrentExercise(exercise);
         setStartTime(Date.now());
         setAnswer('');
-        
-        // Update double points state from storage
         getIncentiveData().then((incentiveData) => {
           setHasDoublePoints(incentiveData.nextQuestionDoublePoints);
         });
-        
-        // Animate in new exercise
-        Animated.timing(exerciseAnim, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }).start(() => {
-          // Focus input after animation completes
+        if (nativeDriver) {
+          Animated.timing(exerciseAnim, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: true,
+          }).start(() => inputRef.current?.focus());
+        } else {
+          exerciseAnim.setValue(1);
           inputRef.current?.focus();
-        });
-      });
+        }
+      };
+
+      if (nativeDriver) {
+        Animated.timing(exerciseAnim, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }).start(showNextExercise);
+      } else {
+        exerciseAnim.setValue(1);
+        showNextExercise();
+      }
       
       // Update the flag for showing wrong exercise
       if (freshData.lastWrongExercise) {
@@ -278,7 +292,7 @@ export const PracticeScreen: React.FC<Props> = ({
         toValue: 1,
         friction: 8,
         tension: 40,
-        useNativeDriver: true,
+        useNativeDriver: Platform.OS !== 'web',
       }).start(() => {
         // After regular feedback, show double points popup if it was determined earlier
         if (shouldShowDoublePoints) {
@@ -295,10 +309,10 @@ export const PracticeScreen: React.FC<Props> = ({
   };
 
   const handleContinue = () => {
-    // If incentive popup is showing, don't load new exercise yet
-    if (!showIncentivePopup) {
-      selectNewExercise();
+    if (showIncentivePopup) {
+      return;
     }
+    selectNewExercise();
   };
 
   const handleIncentiveContinue = async () => {
