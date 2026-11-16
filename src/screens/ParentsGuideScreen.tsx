@@ -10,13 +10,12 @@ import {
   BackHandler,
   I18nManager,
   Modal,
-  Pressable,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { User } from '../types';
 import { rtlHeaderRow, rtlText } from '../rtlStyles';
 
-const RESET_HOLD_MS = 2000;
+const RESET_COUNTDOWN_SECONDS = 5;
 
 interface Props {
   user: User;
@@ -32,61 +31,74 @@ export const ParentsGuideScreen: React.FC<Props> = ({
   onResetAllData,
 }) => {
   const [showResetModal, setShowResetModal] = useState(false);
-  const [holdProgress, setHoldProgress] = useState(0);
+  const [resetPhase, setResetPhase] = useState<'confirm' | 'countdown'>('confirm');
+  const [countdown, setCountdown] = useState<number | null>(null);
   const [isResetting, setIsResetting] = useState(false);
   const [resetError, setResetError] = useState<string | null>(null);
-  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const holdTickRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const holdStartRef = useRef<number>(0);
+  const countdownTickRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const cancelHold = useCallback(() => {
-    if (holdTimerRef.current) {
-      clearTimeout(holdTimerRef.current);
-      holdTimerRef.current = null;
+  const stopCountdown = useCallback(() => {
+    if (countdownTickRef.current) {
+      clearInterval(countdownTickRef.current);
+      countdownTickRef.current = null;
     }
-    if (holdTickRef.current) {
-      clearInterval(holdTickRef.current);
-      holdTickRef.current = null;
-    }
-    setHoldProgress(0);
+    setCountdown(null);
+    setResetPhase('confirm');
   }, []);
 
   useEffect(() => {
-    return () => cancelHold();
-  }, [cancelHold]);
+    return () => {
+      if (countdownTickRef.current) {
+        clearInterval(countdownTickRef.current);
+      }
+    };
+  }, []);
+
+  const runReset = async () => {
+    setIsResetting(true);
+    try {
+      await onResetAllData();
+    } catch {
+      setResetError('האיפוס נכשל. נסו שוב.');
+      setIsResetting(false);
+      setResetPhase('confirm');
+    }
+  };
 
   const closeResetModal = () => {
     if (isResetting) return;
-    cancelHold();
+    stopCountdown();
     setResetError(null);
+    setResetPhase('confirm');
     setShowResetModal(false);
   };
 
-  const startHold = () => {
+  const cancelCountdown = () => {
     if (isResetting) return;
+    stopCountdown();
     setResetError(null);
-    holdStartRef.current = Date.now();
-    setHoldProgress(0);
-    holdTickRef.current = setInterval(() => {
-      const elapsed = Date.now() - holdStartRef.current;
-      setHoldProgress(Math.min(1, elapsed / RESET_HOLD_MS));
-    }, 50);
-    holdTimerRef.current = setTimeout(async () => {
-      cancelHold();
-      setIsResetting(true);
-      try {
-        await onResetAllData();
-      } catch {
-        setResetError('האיפוס נכשל. נסו שוב.');
-        setIsResetting(false);
-      }
-    }, RESET_HOLD_MS);
   };
 
-  const endHold = () => {
-    if (!isResetting) {
-      cancelHold();
-    }
+  const startCountdown = () => {
+    if (isResetting) return;
+    setResetError(null);
+    setResetPhase('countdown');
+    setCountdown(RESET_COUNTDOWN_SECONDS);
+
+    countdownTickRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev === null) return null;
+        if (prev <= 1) {
+          if (countdownTickRef.current) {
+            clearInterval(countdownTickRef.current);
+            countdownTickRef.current = null;
+          }
+          void runReset();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
   };
   // Handle Android back button and force RTL
   useEffect(() => {
@@ -267,7 +279,10 @@ export const ParentsGuideScreen: React.FC<Props> = ({
           </View>
           <TouchableOpacity
             style={styles.resetTriggerButton}
-            onPress={() => setShowResetModal(true)}
+            onPress={() => {
+              setResetPhase('confirm');
+              setShowResetModal(true);
+            }}
           >
             <Text style={styles.resetTriggerText}>איפוס כל הנתונים</Text>
           </TouchableOpacity>
@@ -303,32 +318,49 @@ export const ParentsGuideScreen: React.FC<Props> = ({
       >
         <View style={styles.modalOverlay}>
           <View style={styles.resetModalCard}>
-            <Text style={styles.resetModalTitle}>לאפס את כל הנתונים?</Text>
-            <Text style={styles.resetModalBody}>
-              יימחקו שם המשתמש/ת, כל תוצאות התרגול, קבוצות התרגילים, ניקוד, רצפים והדמויות. הפעולה
-              נשמרת רק בדפדפן או במכשיר הזה.
-            </Text>
-            {resetError && <Text style={styles.resetErrorText}>{resetError}</Text>}
-            <Pressable
-              style={[styles.resetHoldButton, isResetting && styles.resetHoldButtonDisabled]}
-              onPressIn={startHold}
-              onPressOut={endHold}
-              disabled={isResetting}
-            >
-              <View
-                style={[styles.resetHoldProgress, { width: `${holdProgress * 100}%` }]}
-              />
-              <Text style={styles.resetHoldLabel}>
-                {isResetting ? 'מאפס...' : 'לאיפוס לחצו והחזיקו 2 שניות'}
-              </Text>
-            </Pressable>
-            <TouchableOpacity
-              style={styles.resetCancelButton}
-              onPress={closeResetModal}
-              disabled={isResetting}
-            >
-              <Text style={styles.resetCancelText}>ביטול</Text>
-            </TouchableOpacity>
+            {resetPhase === 'confirm' ? (
+              <>
+                <Text style={styles.resetModalTitle}>לאפס את כל הנתונים?</Text>
+                <Text style={styles.resetModalBody}>
+                  יימחקו שם המשתמש/ת, כל תוצאות התרגול, קבוצות התרגילים, ניקוד, רצפים והדמויות. הפעולה
+                  נשמרת רק בדפדפן או במכשיר הזה.
+                </Text>
+                {resetError && <Text style={styles.resetErrorText}>{resetError}</Text>}
+                <TouchableOpacity
+                  style={[styles.resetStartButton, isResetting && styles.resetStartButtonDisabled]}
+                  onPress={startCountdown}
+                  disabled={isResetting}
+                >
+                  <Text style={styles.resetStartText}>
+                    {isResetting ? 'מאפס...' : 'התחל ספירה לאחור (5 שניות)'}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.resetCancelButton}
+                  onPress={closeResetModal}
+                  disabled={isResetting}
+                >
+                  <Text style={styles.resetCancelText}>ביטול</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <Text style={styles.resetModalTitle}>איפוס בעוד...</Text>
+                <Text style={styles.resetCountdownNumber}>
+                  {isResetting ? '—' : countdown ?? RESET_COUNTDOWN_SECONDS}
+                </Text>
+                <Text style={styles.resetCountdownHint}>
+                  אם לא תלחצו ביטול, כל הנתונים יימחקו בסיום הספירה.
+                </Text>
+                <TouchableOpacity
+                  style={styles.resetCancelCountdownButton}
+                  onPress={cancelCountdown}
+                  disabled={isResetting}
+                >
+                  <Text style={styles.resetCancelCountdownText}>ביטול האיפוס</Text>
+                </TouchableOpacity>
+              </>
+            )}
           </View>
         </View>
       </Modal>
@@ -685,35 +717,54 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     ...rtlText,
   },
-  resetHoldButton: {
+  resetStartButton: {
     borderRadius: 14,
-    overflow: 'hidden',
-    backgroundColor: '#f8d7da',
-    borderWidth: 2,
-    borderColor: '#dc3545',
+    backgroundColor: '#dc3545',
     minHeight: 52,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
+    paddingHorizontal: 16,
   },
-  resetHoldButtonDisabled: {
+  resetStartButtonDisabled: {
     opacity: 0.7,
   },
-  resetHoldProgress: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    backgroundColor: '#dc3545',
-    opacity: 0.35,
-  },
-  resetHoldLabel: {
+  resetStartText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#721c24',
+    color: 'white',
     textAlign: 'center',
-    paddingHorizontal: 12,
     paddingVertical: 14,
+    ...rtlText,
+  },
+  resetCountdownNumber: {
+    fontSize: 72,
+    fontWeight: 'bold',
+    color: '#dc3545',
+    textAlign: 'center',
+    marginVertical: 16,
+  },
+  resetCountdownHint: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: '#555',
+    textAlign: 'center',
+    marginBottom: 24,
+    ...rtlText,
+  },
+  resetCancelCountdownButton: {
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: '#27ae60',
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+  },
+  resetCancelCountdownText: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#27ae60',
     ...rtlText,
   },
   resetCancelButton: {
