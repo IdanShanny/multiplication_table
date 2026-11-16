@@ -332,7 +332,7 @@ export const ParentsGuideScreen: React.FC<Props> = ({
                   disabled={isResetting}
                 >
                   <Text style={styles.resetStartText}>
-                    {isResetting ? 'מאפס...' : 'התחל ספירה לאחור (5 שניות)'}
+                    {isResetting ? 'מאפס...' : 'כן, לאפס את הכל'}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
