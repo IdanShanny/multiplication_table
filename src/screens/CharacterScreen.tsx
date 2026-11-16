@@ -10,7 +10,15 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { User, CharacterStage, CompletedCharacter, CharacterColor, CharacterSkin, CharacterAnimation } from '../types';
-import { getCharacterData, getIncentiveData, updateCharacterColor, updateCharacterSkin, updateCharacterAnimation, completeCharacter, getPointsForNextStage } from '../storage';
+import {
+  getCharacterData,
+  updateCharacterColor,
+  updateCharacterSkin,
+  updateCharacterAnimation,
+  completeCharacter,
+  getPointsForNextStage,
+} from '../storage';
+import { getThresholdForStage } from '../characterProgress';
 import { rtlHeaderRow, rtlText } from '../rtlStyles';
 
 interface Props {
@@ -23,7 +31,7 @@ type SelectionMode = 'none' | 'color' | 'skin' | 'animation';
 export const CharacterScreen: React.FC<Props> = ({ user, onBack }) => {
   const [currentCharacter, setCurrentCharacter] = useState<CharacterStage>({ stage: 0 });
   const [completedCharacters, setCompletedCharacters] = useState<CompletedCharacter[]>([]);
-  const [totalPoints, setTotalPoints] = useState(0);
+  const [buildPoints, setBuildPoints] = useState(0);
   const [selectionMode, setSelectionMode] = useState<SelectionMode>('none');
   const [showCompletedList, setShowCompletedList] = useState(false);
   const [animValue] = useState(new Animated.Value(0));
@@ -50,18 +58,21 @@ export const CharacterScreen: React.FC<Props> = ({ user, onBack }) => {
 
   const loadData = async () => {
     const characterData = await getCharacterData();
-    const incentiveData = await getIncentiveData();
     setCurrentCharacter(characterData.currentCharacter);
     setCompletedCharacters(characterData.completedCharacters);
-    setTotalPoints(incentiveData.totalPoints);
+    setBuildPoints(characterData.pointsTowardCurrentCharacter);
   };
 
   const getPointsNeededForNextStage = (): number => {
+    const threshold = getThresholdForStage(currentCharacter.stage);
+    if (threshold !== null) return threshold;
     return getPointsForNextStage(currentCharacter.stage);
   };
 
   const canProgressToNextStage = (): boolean => {
-    return totalPoints >= getPointsNeededForNextStage();
+    const needed = getPointsNeededForNextStage();
+    if (needed <= 0) return false;
+    return buildPoints >= needed;
   };
 
   const handleStageProgress = () => {
@@ -159,15 +170,34 @@ export const CharacterScreen: React.FC<Props> = ({ user, onBack }) => {
       outputRange: ['0deg', currentCharacter.animation === 'spin' ? '360deg' : '0deg'],
     }) : '0deg';
     
-    const scale = shouldAnimate ? animValue.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: [1, currentCharacter.animation === 'jump' ? 1.2 : 1, 1],
-    }) : 1;
+    const isSmile = shouldAnimate && currentCharacter.animation === 'smile';
+    const scale = shouldAnimate
+      ? animValue.interpolate({
+          inputRange: [0, 0.5, 1],
+          outputRange: [
+            1,
+            currentCharacter.animation === 'jump' || isSmile ? 1.2 : 1,
+            1,
+          ],
+        })
+      : 1;
+
+    const smileOpacity = isSmile
+      ? animValue.interpolate({
+          inputRange: [0, 0.5, 1],
+          outputRange: [0.3, 1, 0.3],
+        })
+      : 0;
 
     return (
       <Animated.View style={[styles.characterDisplay, { transform: [{ rotate: rotation }, { scale }] }]}>
         <Text style={styles.characterEmoji}>{characterEmoji}</Text>
         {skinEmoji && <Text style={styles.skinEmoji}>{skinEmoji}</Text>}
+        {isSmile && (
+          <Animated.Text style={[styles.smileOverlay, { opacity: smileOpacity }]}>
+            😊
+          </Animated.Text>
+        )}
       </Animated.View>
     );
   };
@@ -209,12 +239,12 @@ export const CharacterScreen: React.FC<Props> = ({ user, onBack }) => {
                 <View 
                   style={[
                     styles.progressBarFill, 
-                    { width: `${Math.min((totalPoints / pointsNeeded) * 100, 100)}%` }
+                    { width: `${Math.min((buildPoints / pointsNeeded) * 100, 100)}%` }
                   ]} 
                 />
               </View>
               <Text style={styles.progressText}>
-                {totalPoints} / {pointsNeeded} נקודות
+                {buildPoints} / {pointsNeeded} נקודות לשלב זה
               </Text>
             </View>
             <TouchableOpacity
@@ -223,7 +253,7 @@ export const CharacterScreen: React.FC<Props> = ({ user, onBack }) => {
               disabled={!canProgress}
             >
               <Text style={styles.progressButtonText}>
-                {canProgress ? nextStageText : `צריך עוד ${pointsNeeded - totalPoints} נקודות`}
+                {canProgress ? nextStageText : `צריך עוד ${pointsNeeded - buildPoints} נקודות`}
               </Text>
             </TouchableOpacity>
           </>
@@ -434,6 +464,12 @@ const styles = StyleSheet.create({
   skinEmoji: {
     fontSize: 60,
     marginTop: -30,
+  },
+  smileOverlay: {
+    fontSize: 48,
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
   },
   stageInfo: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',

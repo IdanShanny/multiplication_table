@@ -24,15 +24,20 @@ import {
   getIncentiveData,
   setDoublePointsForNextQuestion,
   checkAndConsumeDoublePoints,
+  getPendingCharacterUnlockAnnouncement,
+  markCharacterUnlockAnnounced,
+  getCharacterData,
 } from '../storage';
 import { getCorrectMessages, getWrongMessages, getRandomMessage, getCorrectAnswerString } from '../messages';
 import { IncentivePopup } from '../components/IncentivePopup';
+import { hasCharacterUpgradeWaiting } from '../characterProgress';
 
 interface Props {
   user: User;
   appData: AppData;
   onDataUpdate: (data: AppData) => void;
   onShowParentsGuide: () => void;
+  onShowCharacter?: () => void;
 }
 
 export const PracticeScreen: React.FC<Props> = ({
@@ -40,6 +45,7 @@ export const PracticeScreen: React.FC<Props> = ({
   appData,
   onDataUpdate,
   onShowParentsGuide,
+  onShowCharacter,
 }) => {
   const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
   const [answer, setAnswer] = useState('');
@@ -51,10 +57,17 @@ export const PracticeScreen: React.FC<Props> = ({
   const [dailyScore, setDailyScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
   const [showIncentivePopup, setShowIncentivePopup] = useState(false);
-  const [incentivePopupType, setIncentivePopupType] = useState<'record' | 'streak' | 'doublePoints'>('record');
+  const [incentivePopupType, setIncentivePopupType] = useState<
+    'record' | 'streak' | 'doublePoints' | 'characterUnlock'
+  >('record');
   const [incentivePopupData, setIncentivePopupData] = useState<any>(null);
   const [hasDoublePoints, setHasDoublePoints] = useState(false);
   const [pendingDoublePoints, setPendingDoublePoints] = useState(false);
+  const [characterUpgradeWaiting, setCharacterUpgradeWaiting] = useState(false);
+  const [pendingCharacterUnlock, setPendingCharacterUnlock] = useState<{
+    stage: 0 | 1 | 2;
+    threshold: number;
+  } | null>(null);
   
   const feedbackAnim = useRef(new Animated.Value(0)).current;
   const exerciseAnim = useRef(new Animated.Value(1)).current;
@@ -70,7 +83,18 @@ export const PracticeScreen: React.FC<Props> = ({
     
     loadFirstExercise();
     loadIncentiveData();
+    loadCharacterBadge();
   }, []);
+
+  const loadCharacterBadge = async () => {
+    if (!onShowCharacter) return;
+    try {
+      const character = await getCharacterData();
+      setCharacterUpgradeWaiting(hasCharacterUpgradeWaiting(character));
+    } catch (error) {
+      console.error('Error loading character badge:', error);
+    }
+  };
 
   // Load incentive data
   const loadIncentiveData = async () => {
@@ -229,6 +253,15 @@ export const PracticeScreen: React.FC<Props> = ({
     
     // Update streak and check for achievements
     const streakResult = await updateStreak(isCorrect && isFast);
+
+    if (onShowCharacter && points > 0) {
+      const announcement = await getPendingCharacterUnlockAnnouncement();
+      if (announcement) {
+        setPendingCharacterUnlock(announcement);
+      }
+      const character = await getCharacterData();
+      setCharacterUpgradeWaiting(hasCharacterUpgradeWaiting(character));
+    }
     
     // Randomly determine if next question should have double points (10% chance)
     // This happens ALWAYS, regardless of other incentives, to maintain uniform 10% probability
@@ -308,8 +341,28 @@ export const PracticeScreen: React.FC<Props> = ({
     // No timeout - wait for user to click "Continue" button
   };
 
-  const handleContinue = () => {
+  const showCharacterUnlockPopup = async (unlock: { stage: 0 | 1 | 2; threshold: number }) => {
+    await markCharacterUnlockAnnounced(unlock.stage);
+    setIncentivePopupType('characterUnlock');
+    setIncentivePopupData({ unlockStage: unlock.stage });
+    setShowIncentivePopup(true);
+    setPendingCharacterUnlock(null);
+  };
+
+  const finishIncentiveChain = async () => {
+    if (pendingCharacterUnlock) {
+      await showCharacterUnlockPopup(pendingCharacterUnlock);
+      return;
+    }
+    selectNewExercise();
+  };
+
+  const handleContinue = async () => {
     if (showIncentivePopup) {
+      return;
+    }
+    if (pendingCharacterUnlock) {
+      await showCharacterUnlockPopup(pendingCharacterUnlock);
       return;
     }
     selectNewExercise();
@@ -331,9 +384,20 @@ export const PracticeScreen: React.FC<Props> = ({
         setIncentivePopupData({});
         setShowIncentivePopup(true);
       }, 300);
-    } else {
-      selectNewExercise();
+      return;
     }
+
+    if (currentType === 'doublePoints' || currentType === 'characterUnlock') {
+      await finishIncentiveChain();
+      return;
+    }
+
+    if (pendingCharacterUnlock) {
+      await showCharacterUnlockPopup(pendingCharacterUnlock);
+      return;
+    }
+
+    selectNewExercise();
   };
 
   if (!currentExercise) {
@@ -362,6 +426,14 @@ export const PracticeScreen: React.FC<Props> = ({
               <TouchableOpacity style={styles.reportButton} onPress={onShowParentsGuide}>
                 <Text style={styles.reportButtonText}>👨‍👩‍👧 להורים</Text>
               </TouchableOpacity>
+              {onShowCharacter && (
+                <TouchableOpacity style={styles.characterButton} onPress={onShowCharacter}>
+                  <Text style={styles.characterButtonText}>
+                    🧑‍🎨 הדמות שלי
+                    {characterUpgradeWaiting ? ' • שדרוג מחכה!' : ''}
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
             <Text style={styles.greeting}>שלום, {user.name}! 👋</Text>
           </View>
@@ -543,6 +615,18 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   reportButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    writingDirection: 'rtl',
+  },
+  characterButton: {
+    backgroundColor: 'rgba(155, 89, 182, 0.9)',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  characterButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '600',

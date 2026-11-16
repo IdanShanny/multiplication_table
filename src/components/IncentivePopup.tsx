@@ -8,16 +8,18 @@ import {
   Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { UNLOCK_STEP_LABELS } from '../characterProgress';
 
 interface Props {
   visible: boolean;
-  type: 'record' | 'streak' | 'doublePoints';
+  type: 'record' | 'streak' | 'doublePoints' | 'characterUnlock';
   userName: string;
   userGender: 'male' | 'female';
   data?: {
     newScore?: number;
     streakCount?: 5 | 10 | 20;
     bonusPoints?: number;
+    unlockStage?: 0 | 1 | 2;
   };
   onContinue: () => void;
 }
@@ -72,6 +74,8 @@ export const IncentivePopup: React.FC<Props> = ({
     } else if (type === 'doublePoints') {
       const verb = userGender === 'female' ? 'תקבלי' : 'תקבל';
       return `${userName}, על השאלה הבאה ${verb} נקודות כפולות! 🎯`;
+    } else if (type === 'characterUnlock' && data?.unlockStage !== undefined) {
+      return `${userName}, הגיע הזמן ל־${UNLOCK_STEP_LABELS[data.unlockStage]}! 🧑‍🎨`;
     }
     return '';
   };
@@ -85,6 +89,8 @@ export const IncentivePopup: React.FC<Props> = ({
       if (data.streakCount === 20) return '💎';
     } else if (type === 'doublePoints') {
       return '🎯';
+    } else if (type === 'characterUnlock') {
+      return '🧑‍🎨';
     }
     return '🎉';
   };
@@ -96,6 +102,8 @@ export const IncentivePopup: React.FC<Props> = ({
       return `קיבלת בונוס של ${data.bonusPoints} נקודות!`;
     } else if (type === 'doublePoints') {
       return 'זו ההזדמנות שלך להרוויח מלא נקודות!';
+    } else if (type === 'characterUnlock') {
+      return 'לחץ על "הדמות שלי" בדף התרגול כדי לבחור!';
     }
     return '';
   };
@@ -131,6 +139,8 @@ export const IncentivePopup: React.FC<Props> = ({
                 ? ['#e74c3c', '#c0392b']
                 : type === 'doublePoints'
                 ? ['#c0392b', '#a93226']
+                : type === 'characterUnlock'
+                ? ['#9b59b6', '#8e44ad']
                 : ['#e74c3c', '#d62c1a']
             }
             style={styles.gradient}

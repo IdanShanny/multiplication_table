@@ -1,6 +1,2 @@
-/**
- * Character progression UI (הדמות שלי).
- * Off for production — re-enable by setting true and wiring App.tsx + PracticeScreen.
- * storage.ts / types.ts / CharacterScreen.tsx are kept for a future release.
- */
-export const FEATURE_CHARACTER = false;
+/** Character progression UI (הדמות שלי). Build points 30/60/90 per avatar. */
+export const FEATURE_CHARACTER = true;

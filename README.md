@@ -63,7 +63,7 @@ Scan the QR code with Expo Go app on your Android device.
 
 ## Feature flags
 
-- `src/features.ts` — `FEATURE_CHARACTER` (הדמות שלי) is **false** in production builds until character UX is ready again.
+- `src/features.ts` — `FEATURE_CHARACTER` toggles הדמות שלי (build points per avatar: 30 / 60 / 90).
 
 ## Versioning
 

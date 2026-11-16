@@ -56,6 +56,10 @@ export interface CompletedCharacter {
 export interface CharacterData {
   currentCharacter: CharacterStage;
   completedCharacters: CompletedCharacter[];
+  /** Points earned toward the current in-progress avatar (resets when a character is completed). */
+  pointsTowardCurrentCharacter: number;
+  /** Build stages (0–2) for which the one-time unlock popup was already shown. */
+  announcedUnlockStages: number[];
 }
 
 export interface AppData {

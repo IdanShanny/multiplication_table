@@ -1,5 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AppData, Exercise, ExerciseResult, User } from './types';
+import { AppData, Exercise, ExerciseResult, User, CharacterData } from './types';
+import {
+  CHARACTER_BUILD_THRESHOLDS,
+  getThresholdForStage,
+  peekCharacterUnlockAnnouncement,
+} from './characterProgress';
 
 const STORAGE_KEY = 'multiplication_table_data';
 
@@ -48,12 +53,14 @@ const getDefaultIncentiveData = () => {
   };
 };
 
-const getDefaultCharacterData = () => {
+const getDefaultCharacterData = (): CharacterData => {
   return {
     currentCharacter: {
       stage: 0 as 0 | 1 | 2 | 3,
     },
     completedCharacters: [],
+    pointsTowardCurrentCharacter: 0,
+    announcedUnlockStages: [],
   };
 };
 
@@ -188,6 +195,17 @@ const migrateAppData = (parsed: any): AppData => {
         typeof c.completedAt === 'number'
       );
     }
+    if (typeof parsed.character.pointsTowardCurrentCharacter === 'number') {
+      migrated.character.pointsTowardCurrentCharacter = Math.max(
+        0,
+        parsed.character.pointsTowardCurrentCharacter
+      );
+    }
+    if (Array.isArray(parsed.character.announcedUnlockStages)) {
+      migrated.character.announcedUnlockStages = parsed.character.announcedUnlockStages.filter(
+        (s: unknown) => typeof s === 'number' && s >= 0 && s <= 2
+      );
+    }
   }
   
   return migrated;
@@ -305,6 +323,7 @@ export const updateDailyScore = async (points: number): Promise<{ newScore: numb
   // Update total points (only add positive points)
   if (points > 0) {
     data.incentive.totalPoints += points;
+    data.character.pointsTowardCurrentCharacter += points;
   }
   
   const newScore = data.incentive.dailyScore;
@@ -397,12 +416,28 @@ export const getCurrentCharacterStage = async () => {
 };
 
 export const getPointsForNextStage = (currentStage: 0 | 1 | 2 | 3): number => {
-  // Each stage requires 30 points
-  return (currentStage + 1) * 30;
+  const threshold = getThresholdForStage(currentStage);
+  return threshold ?? 0;
+};
+
+export const getPendingCharacterUnlockAnnouncement = async () => {
+  const data = await loadAppData();
+  return peekCharacterUnlockAnnouncement(data.character);
+};
+
+export const markCharacterUnlockAnnounced = async (stage: 0 | 1 | 2): Promise<void> => {
+  const data = await loadAppData();
+  if (!data.character.announcedUnlockStages.includes(stage)) {
+    data.character.announcedUnlockStages.push(stage);
+    await saveAppData(data);
+  }
 };
 
 export const updateCharacterColor = async (color: 'white' | 'brown' | 'skin'): Promise<void> => {
   const data = await loadAppData();
+  const current = data.character.currentCharacter;
+  if (current.stage !== 0) return;
+  if (data.character.pointsTowardCurrentCharacter < CHARACTER_BUILD_THRESHOLDS[0]) return;
   data.character.currentCharacter.color = color;
   data.character.currentCharacter.stage = 1;
   await saveAppData(data);
@@ -410,6 +445,9 @@ export const updateCharacterColor = async (color: 'white' | 'brown' | 'skin'): P
 
 export const updateCharacterSkin = async (skin: 'winter' | 'festive' | 'summer'): Promise<void> => {
   const data = await loadAppData();
+  const current = data.character.currentCharacter;
+  if (current.stage !== 1) return;
+  if (data.character.pointsTowardCurrentCharacter < CHARACTER_BUILD_THRESHOLDS[1]) return;
   data.character.currentCharacter.skin = skin;
   data.character.currentCharacter.stage = 2;
   await saveAppData(data);
@@ -417,6 +455,9 @@ export const updateCharacterSkin = async (skin: 'winter' | 'festive' | 'summer')
 
 export const updateCharacterAnimation = async (animation: 'jump' | 'smile' | 'spin'): Promise<void> => {
   const data = await loadAppData();
+  const current = data.character.currentCharacter;
+  if (current.stage !== 2) return;
+  if (data.character.pointsTowardCurrentCharacter < CHARACTER_BUILD_THRESHOLDS[2]) return;
   data.character.currentCharacter.animation = animation;
   data.character.currentCharacter.stage = 3;
   await saveAppData(data);
@@ -438,11 +479,13 @@ export const completeCharacter = async (): Promise<void> => {
     
     data.character.completedCharacters.push(completedCharacter);
     
-    // Reset current character
+    // Reset current character build
     data.character.currentCharacter = {
       stage: 0,
     };
-    
+    data.character.pointsTowardCurrentCharacter = 0;
+    data.character.announcedUnlockStages = [];
+
     await saveAppData(data);
   }
 };
