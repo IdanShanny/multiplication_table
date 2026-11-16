@@ -5,7 +5,6 @@ import { RegistrationScreen } from './src/screens/RegistrationScreen';
 import { PracticeScreen } from './src/screens/PracticeScreen';
 import { ReportScreen } from './src/screens/ReportScreen';
 import { ParentsGuideScreen } from './src/screens/ParentsGuideScreen';
-import { CharacterScreen } from './src/screens/CharacterScreen';
 import { AppData, User } from './src/types';
 import { loadAppData, saveUser } from './src/storage';
 
@@ -13,7 +12,7 @@ import { loadAppData, saveUser } from './src/storage';
 I18nManager.allowRTL(true);
 I18nManager.forceRTL(true);
 
-type Screen = 'loading' | 'registration' | 'practice' | 'parentsGuide' | 'report' | 'character';
+type Screen = 'loading' | 'registration' | 'practice' | 'parentsGuide' | 'report';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('loading');
@@ -52,10 +51,6 @@ export default function App() {
 
   const handleShowReport = () => {
     setScreen('report');
-  };
-
-  const handleShowCharacter = () => {
-    setScreen('character');
   };
 
   const handleBackToPractice = async () => {
@@ -104,14 +99,6 @@ export default function App() {
     );
   }
 
-  if (screen === 'character' && appData.user) {
-    return (
-      <AppShell>
-        <CharacterScreen user={appData.user} onBack={handleBackToPractice} />
-      </AppShell>
-    );
-  }
-
   if (appData.user) {
     return (
       <AppShell>
@@ -120,7 +107,6 @@ export default function App() {
           appData={appData}
           onDataUpdate={handleDataUpdate}
           onShowParentsGuide={handleShowParentsGuide}
-          onShowCharacter={handleShowCharacter}
         />
       </AppShell>
     );

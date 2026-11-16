@@ -11,15 +11,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 interface Props {
   visible: boolean;
-  type: 'record' | 'streak' | 'doublePoints' | 'stageUp';
+  type: 'record' | 'streak' | 'doublePoints';
   userName: string;
   userGender: 'male' | 'female';
   data?: {
     newScore?: number;
     streakCount?: 5 | 10 | 20;
     bonusPoints?: number;
-    currentStage?: 0 | 1 | 2 | 3;
-    totalPoints?: number;
   };
   onContinue: () => void;
 }
@@ -74,16 +72,6 @@ export const IncentivePopup: React.FC<Props> = ({
     } else if (type === 'doublePoints') {
       const verb = userGender === 'female' ? 'תקבלי' : 'תקבל';
       return `${userName}, על השאלה הבאה ${verb} נקודות כפולות! 🎯`;
-    } else if (type === 'stageUp' && data?.currentStage !== undefined) {
-      const verb = userGender === 'female' ? 'הגעת' : 'הגעת';
-      const stage = data.currentStage;
-      if (stage === 0) {
-        return `מעולה ${userName}! ${verb} ל-30 נקודות!\nהדמות שלך עלתה שלב!`;
-      } else if (stage === 1) {
-        return `כל הכבוד ${userName}! ${verb} ל-60 נקודות!\nהדמות שלך עלתה שלב!`;
-      } else if (stage === 2) {
-        return `מדהים ${userName}! ${verb} ל-90 נקודות!\nהדמות שלך עלתה שלב!`;
-      }
     }
     return '';
   };
@@ -97,8 +85,6 @@ export const IncentivePopup: React.FC<Props> = ({
       if (data.streakCount === 20) return '💎';
     } else if (type === 'doublePoints') {
       return '🎯';
-    } else if (type === 'stageUp') {
-      return '🎊';
     }
     return '🎉';
   };
@@ -110,15 +96,6 @@ export const IncentivePopup: React.FC<Props> = ({
       return `קיבלת בונוס של ${data.bonusPoints} נקודות!`;
     } else if (type === 'doublePoints') {
       return 'זו ההזדמנות שלך להרוויח מלא נקודות!';
-    } else if (type === 'stageUp' && data?.currentStage !== undefined) {
-      const stage = data.currentStage;
-      if (stage === 0) {
-        return 'לחץ על "הדמות שלי" כדי לבחור צבע!';
-      } else if (stage === 1) {
-        return 'לחץ על "הדמות שלי" כדי לבחור סקין!';
-      } else if (stage === 2) {
-        return 'לחץ על "הדמות שלי" כדי לבחור אנימציה!';
-      }
     }
     return '';
   };
@@ -150,13 +127,11 @@ export const IncentivePopup: React.FC<Props> = ({
         >
           <LinearGradient
             colors={
-              type === 'record' 
-                ? ['#e74c3c', '#c0392b']  // Red gradient for record
+              type === 'record'
+                ? ['#e74c3c', '#c0392b']
                 : type === 'doublePoints'
-                ? ['#c0392b', '#a93226']  // Dark red gradient for double points
-                : type === 'stageUp'
-                ? ['#9b59b6', '#8e44ad']  // Purple gradient for stage up
-                : ['#e74c3c', '#d62c1a']  // Red gradient for streak
+                ? ['#c0392b', '#a93226']
+                : ['#e74c3c', '#d62c1a']
             }
             style={styles.gradient}
           >

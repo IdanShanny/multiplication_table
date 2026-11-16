@@ -61,6 +61,10 @@ npx expo start
 
 Scan the QR code with Expo Go app on your Android device.
 
+## Feature flags
+
+- `src/features.ts` — `FEATURE_CHARACTER` (הדמות שלי) is **false** in production builds until character UX is ready again.
+
 ## Versioning
 
 - **Source of truth:** `package.json` `version` and `app.json` → `expo.version` (keep equal).
