@@ -7,7 +7,7 @@ import { ReportScreen } from './src/screens/ReportScreen';
 import { ParentsGuideScreen } from './src/screens/ParentsGuideScreen';
 import { CharacterScreen } from './src/screens/CharacterScreen';
 import { AppData, User } from './src/types';
-import { loadAppData, saveUser } from './src/storage';
+import { loadAppData, saveUser, clearAllData } from './src/storage';
 import { FEATURE_CHARACTER } from './src/features';
 
 // Enable RTL for Hebrew
@@ -65,6 +65,13 @@ export default function App() {
     setScreen('practice');
   };
 
+  const handleResetAllData = async () => {
+    await clearAllData();
+    const data = await loadAppData();
+    setAppData(data);
+    setScreen('registration');
+  };
+
   if (screen === 'loading' || !appData) {
     return (
       <AppShell>
@@ -88,6 +95,7 @@ export default function App() {
           user={appData.user}
           onBack={handleBackToPractice}
           onShowReport={handleShowReport}
+          onResetAllData={handleResetAllData}
         />
       </AppShell>
     );

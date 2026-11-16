@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,18 +9,85 @@ import {
   Linking,
   BackHandler,
   I18nManager,
+  Modal,
+  Pressable,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { User } from '../types';
 import { rtlHeaderRow, rtlText } from '../rtlStyles';
 
+const RESET_HOLD_MS = 2000;
+
 interface Props {
   user: User;
   onBack: () => void;
   onShowReport: () => void;
+  onResetAllData: () => Promise<void>;
 }
 
-export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport }) => {
+export const ParentsGuideScreen: React.FC<Props> = ({
+  user,
+  onBack,
+  onShowReport,
+  onResetAllData,
+}) => {
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [holdProgress, setHoldProgress] = useState(0);
+  const [isResetting, setIsResetting] = useState(false);
+  const [resetError, setResetError] = useState<string | null>(null);
+  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const holdTickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const holdStartRef = useRef<number>(0);
+
+  const cancelHold = useCallback(() => {
+    if (holdTimerRef.current) {
+      clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+    if (holdTickRef.current) {
+      clearInterval(holdTickRef.current);
+      holdTickRef.current = null;
+    }
+    setHoldProgress(0);
+  }, []);
+
+  useEffect(() => {
+    return () => cancelHold();
+  }, [cancelHold]);
+
+  const closeResetModal = () => {
+    if (isResetting) return;
+    cancelHold();
+    setResetError(null);
+    setShowResetModal(false);
+  };
+
+  const startHold = () => {
+    if (isResetting) return;
+    setResetError(null);
+    holdStartRef.current = Date.now();
+    setHoldProgress(0);
+    holdTickRef.current = setInterval(() => {
+      const elapsed = Date.now() - holdStartRef.current;
+      setHoldProgress(Math.min(1, elapsed / RESET_HOLD_MS));
+    }, 50);
+    holdTimerRef.current = setTimeout(async () => {
+      cancelHold();
+      setIsResetting(true);
+      try {
+        await onResetAllData();
+      } catch {
+        setResetError('האיפוס נכשל. נסו שוב.');
+        setIsResetting(false);
+      }
+    }, RESET_HOLD_MS);
+  };
+
+  const endHold = () => {
+    if (!isResetting) {
+      cancelHold();
+    }
+  };
   // Handle Android back button and force RTL
   useEffect(() => {
     // Force RTL on every component mount to prevent layout flipping
@@ -192,6 +259,19 @@ export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport
             תנו לילד שלכם 10 דקות ביום, עקבו אחרי ההתקדמות, ותראו כמה מהר הוא משיג שליטה מלאה בלוח הכפל.
           </Text>
 
+          <Text style={styles.sectionTitle}>⚙️ הגדרות להורים</Text>
+          <View style={styles.warningBox}>
+            <Text style={styles.warningText}>
+              איפוס מוחק את כל הנתונים במכשיר הזה בלבד (שם, תרגול, ניקוד, דמויות). אי אפשר לבטל.
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={styles.resetTriggerButton}
+            onPress={() => setShowResetModal(true)}
+          >
+            <Text style={styles.resetTriggerText}>איפוס כל הנתונים</Text>
+          </TouchableOpacity>
+
           {/* Contact Section */}
           <View style={styles.contactSection}>
             <Text style={styles.contactTitle}>יש לכם רעיון? הצעה? הערה?</Text>
@@ -214,6 +294,44 @@ export const ParentsGuideScreen: React.FC<Props> = ({ user, onBack, onShowReport
           </View>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={showResetModal}
+        transparent
+        animationType="fade"
+        onRequestClose={closeResetModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.resetModalCard}>
+            <Text style={styles.resetModalTitle}>לאפס את כל הנתונים?</Text>
+            <Text style={styles.resetModalBody}>
+              יימחקו שם המשתמש/ת, כל תוצאות התרגול, קבוצות התרגילים, ניקוד, רצפים והדמויות. הפעולה
+              נשמרת רק בדפדפן או במכשיר הזה.
+            </Text>
+            {resetError && <Text style={styles.resetErrorText}>{resetError}</Text>}
+            <Pressable
+              style={[styles.resetHoldButton, isResetting && styles.resetHoldButtonDisabled]}
+              onPressIn={startHold}
+              onPressOut={endHold}
+              disabled={isResetting}
+            >
+              <View
+                style={[styles.resetHoldProgress, { width: `${holdProgress * 100}%` }]}
+              />
+              <Text style={styles.resetHoldLabel}>
+                {isResetting ? 'מאפס...' : 'לאיפוס לחצו והחזיקו 2 שניות'}
+              </Text>
+            </Pressable>
+            <TouchableOpacity
+              style={styles.resetCancelButton}
+              onPress={closeResetModal}
+              disabled={isResetting}
+            >
+              <Text style={styles.resetCancelText}>ביטול</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </LinearGradient>
   );
 };
@@ -513,6 +631,100 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     lineHeight: 24,
+  },
+  resetTriggerButton: {
+    marginBottom: 24,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#dc3545',
+    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
+  resetTriggerText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#dc3545',
+    ...rtlText,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  resetModalCard: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 24,
+    width: '100%',
+    maxWidth: 400,
+  },
+  resetModalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 12,
+    ...rtlText,
+  },
+  resetModalBody: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#555',
+    textAlign: 'center',
+    marginBottom: 20,
+    ...rtlText,
+  },
+  resetErrorText: {
+    fontSize: 15,
+    color: '#dc3545',
+    textAlign: 'center',
+    marginBottom: 12,
+    ...rtlText,
+  },
+  resetHoldButton: {
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: '#f8d7da',
+    borderWidth: 2,
+    borderColor: '#dc3545',
+    minHeight: 52,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  resetHoldButtonDisabled: {
+    opacity: 0.7,
+  },
+  resetHoldProgress: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    backgroundColor: '#dc3545',
+    opacity: 0.35,
+  },
+  resetHoldLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#721c24',
+    textAlign: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+    ...rtlText,
+  },
+  resetCancelButton: {
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  resetCancelText: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#666',
+    ...rtlText,
   },
 });
 
