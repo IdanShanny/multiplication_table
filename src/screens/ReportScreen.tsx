@@ -19,6 +19,7 @@ import {
   getAllTimeStats,
   formatTime,
 } from '../statistics';
+import { rtlHeaderRow, rtlText } from '../rtlStyles';
 
 interface Props {
   user: User;
@@ -218,7 +219,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flexDirection: 'row',
+    ...rtlHeaderRow,
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
@@ -241,7 +242,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 22,
     fontWeight: 'bold',
-    marginLeft: 16,
+    marginStart: 16,
     flex: 1,
     textAlign: 'center',
     writingDirection: 'rtl',
@@ -325,6 +326,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     padding: 12,
     borderRadius: 8,
+    ...rtlText,
   },
   groupContainer: {
     marginBottom: 16,
@@ -396,7 +398,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   emailGradient: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 15,
@@ -404,7 +406,7 @@ const styles = StyleSheet.create({
   },
   emailIcon: {
     fontSize: 24,
-    marginLeft: 10,
+    marginStart: 10,
   },
   emailText: {
     color: 'white',

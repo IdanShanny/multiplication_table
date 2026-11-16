@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Gender, User } from '../types';
+import { rtlInput, rtlText } from '../rtlStyles';
 
 interface Props {
   onRegister: (user: User) => void;
@@ -65,7 +66,6 @@ export const RegistrationScreen: React.FC<Props> = ({ onRegister }) => {
               }}
               placeholder="הכנס את שמך"
               placeholderTextColor="#999"
-              textAlign="right"
               maxLength={12}
             />
           </View>
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
     marginBottom: 12,
-    textAlign: 'right',
+    ...rtlText,
   },
   input: {
     borderWidth: 2,
@@ -192,6 +192,7 @@ const styles = StyleSheet.create({
     padding: 16,
     fontSize: 18,
     backgroundColor: '#f8f8f8',
+    ...rtlInput,
   },
   genderContainer: {
     marginBottom: 24,
@@ -238,7 +239,7 @@ const styles = StyleSheet.create({
   },
   errorEmoji: {
     fontSize: 24,
-    marginRight: 10,
+    marginStart: 10,
   },
   errorText: {
     color: '#c0392b',

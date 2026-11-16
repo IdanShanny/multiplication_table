@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { View, StyleSheet, I18nManager } from 'react-native';
+import { View, StyleSheet, I18nManager, Platform } from 'react-native';
 import { RegistrationScreen } from './src/screens/RegistrationScreen';
 import { PracticeScreen } from './src/screens/PracticeScreen';
 import { ReportScreen } from './src/screens/ReportScreen';
@@ -21,6 +21,13 @@ export default function App() {
 
   useEffect(() => {
     loadInitialData();
+  }, []);
+
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      document.documentElement.setAttribute('dir', 'rtl');
+      document.documentElement.setAttribute('lang', 'he');
+    }
   }, []);
 
   const loadInitialData = async () => {

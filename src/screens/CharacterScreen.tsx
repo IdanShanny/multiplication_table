@@ -11,6 +11,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { User, CharacterStage, CompletedCharacter, CharacterColor, CharacterSkin, CharacterAnimation } from '../types';
 import { getCharacterData, getIncentiveData, updateCharacterColor, updateCharacterSkin, updateCharacterAnimation, completeCharacter, getPointsForNextStage } from '../storage';
+import { rtlHeaderRow, rtlText } from '../rtlStyles';
 
 interface Props {
   user: User;
@@ -385,7 +386,7 @@ const styles = StyleSheet.create({
     paddingBottom: Platform.OS === 'android' ? 80 : 40,
   },
   header: {
-    flexDirection: 'row',
+    ...rtlHeaderRow,
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: Platform.OS === 'ios' ? 40 : 20,
@@ -395,6 +396,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 28,
     fontWeight: 'bold',
+    ...rtlText,
   },
   backButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
@@ -406,6 +408,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+    writingDirection: 'rtl',
   },
   characterCard: {
     backgroundColor: 'white',
@@ -444,6 +447,7 @@ const styles = StyleSheet.create({
     color: '#333',
     textAlign: 'center',
     marginBottom: 15,
+    writingDirection: 'rtl',
   },
   progressBar: {
     marginBottom: 15,
@@ -465,6 +469,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#666',
     textAlign: 'center',
+    writingDirection: 'rtl',
   },
   progressButton: {
     backgroundColor: '#9b59b6',
@@ -480,6 +485,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+    writingDirection: 'rtl',
   },
   completeButton: {
     backgroundColor: '#f39c12',
@@ -509,6 +515,7 @@ const styles = StyleSheet.create({
     color: '#9b59b6',
     fontSize: 18,
     fontWeight: 'bold',
+    writingDirection: 'rtl',
   },
   modalOverlay: {
     position: 'absolute',
@@ -535,6 +542,7 @@ const styles = StyleSheet.create({
     color: '#333',
     textAlign: 'center',
     marginBottom: 20,
+    writingDirection: 'rtl',
   },
   optionButton: {
     backgroundColor: '#9b59b6',
@@ -548,6 +556,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+    writingDirection: 'rtl',
   },
   cancelButton: {
     backgroundColor: '#e74c3c',

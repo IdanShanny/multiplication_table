@@ -14,6 +14,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppData, Exercise, ExerciseResult, User, DELAY_THRESHOLD } from '../types';
 import { selectNextExercise } from '../exerciseLogic';
+import { rtlHeaderRow, rtlInput, rtlText } from '../rtlStyles';
 import { saveExerciseResult, loadAppData, saveAppData, updateDailyScore, updateStreak, getIncentiveData, setDoublePointsForNextQuestion, checkAndConsumeDoublePoints, getCharacterData, getPointsForNextStage } from '../storage';
 import { getCorrectMessages, getWrongMessages, getRandomMessage, getCorrectAnswerString } from '../messages';
 import { IncentivePopup } from '../components/IncentivePopup';
@@ -440,7 +441,6 @@ export const PracticeScreen: React.FC<Props> = ({
                 returnKeyType="done"
                 placeholder="התשובה שלך"
                 placeholderTextColor="#999"
-                textAlign="center"
                 editable={!showingFeedback}
                 onSubmitEditing={handleSubmit}
                 autoFocus
@@ -542,7 +542,7 @@ const styles = StyleSheet.create({
     marginTop: 100,
   },
   header: {
-    flexDirection: 'row',
+    ...rtlHeaderRow,
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: Platform.OS === 'ios' ? 40 : 20,
@@ -605,6 +605,8 @@ const styles = StyleSheet.create({
     color: '#666',
     fontWeight: '600',
     marginBottom: 4,
+    ...rtlText,
+    textAlign: 'center',
   },
   scoreValue: {
     fontSize: 28,
@@ -669,6 +671,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     backgroundColor: '#fff5f5',
     color: '#333',
+    ...rtlInput,
   },
   submitButton: {
     borderRadius: 16,
@@ -714,6 +717,7 @@ const styles = StyleSheet.create({
     color: '#333',
     textAlign: 'center',
     lineHeight: 26,
+    writingDirection: 'rtl',
   },
   correctAnswerContainer: {
     marginTop: 12,
@@ -733,6 +737,7 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     marginBottom: 6,
+    writingDirection: 'rtl',
   },
   correctAnswerText: {
     fontSize: 30,

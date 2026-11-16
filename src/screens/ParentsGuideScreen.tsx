@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { User } from '../types';
+import { rtlHeaderRow, rtlText } from '../rtlStyles';
 
 interface Props {
   user: User;
@@ -222,7 +223,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flexDirection: 'row',
+    ...rtlHeaderRow,
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: Platform.OS === 'ios' ? 50 : 20,
@@ -278,12 +279,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 5,
+    writingDirection: 'rtl',
   },
   reportButtonSubtext: {
     color: 'white',
     fontSize: 16,
     textAlign: 'center',
     opacity: 0.95,
+    writingDirection: 'rtl',
   },
   card: {
     backgroundColor: 'white',
@@ -308,6 +311,7 @@ const styles = StyleSheet.create({
     color: '#e74c3c',
     marginTop: 25,
     marginBottom: 15,
+    ...rtlText,
   },
   subSectionTitle: {
     fontSize: 18,
@@ -315,12 +319,14 @@ const styles = StyleSheet.create({
     color: '#c0392b',
     marginTop: 20,
     marginBottom: 10,
+    ...rtlText,
   },
   text: {
     fontSize: 16,
     lineHeight: 24,
     color: '#333',
     marginBottom: 12,
+    ...rtlText,
   },
   emphasizedText: {
     fontWeight: 'bold',
@@ -346,7 +352,8 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     color: '#333',
     marginBottom: 8,
-    marginRight: 10,
+    marginStart: 10,
+    ...rtlText,
   },
   highlightBox: {
     backgroundColor: '#fff3cd',
@@ -361,6 +368,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     color: '#333',
     marginBottom: 5,
+    ...rtlText,
   },
   warningBox: {
     backgroundColor: '#f8d7da',
@@ -375,6 +383,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     color: '#333',
     fontWeight: '600',
+    ...rtlText,
   },
   infoBox: {
     backgroundColor: '#d1ecf1',
@@ -388,6 +397,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
     color: '#333',
+    ...rtlText,
   },
   successBox: {
     backgroundColor: '#d4edda',
@@ -439,6 +449,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     color: '#333',
+    ...rtlText,
   },
   contactSection: {
     marginTop: 30,
@@ -467,7 +478,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   emailGradient: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 15,
@@ -475,12 +486,14 @@ const styles = StyleSheet.create({
   },
   emailIcon: {
     fontSize: 24,
-    marginLeft: 10,
+    marginStart: 10,
   },
   emailText: {
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+    ...rtlText,
+    textAlign: 'center',
   },
   footer: {
     marginTop: 30,
