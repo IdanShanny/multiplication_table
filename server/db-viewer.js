@@ -10,6 +10,10 @@ function renderDbHtmlDocument(title, bodyHtml) {
     h1 { font-size: 1.25rem; }
     a { color: #c0392b; }
     pre { white-space: pre-wrap; word-break: break-word; font-size: 0.875rem; }
+    table { border-collapse: collapse; width: 100%; max-width: 56rem; font-size: 0.9rem; }
+    th, td { border: 1px solid #ddd; padding: 0.5rem 0.75rem; text-align: left; }
+    th { background: #f5f5f5; }
+    tr:nth-child(even) { background: #fafafa; }
   </style>
 </head>
 <body>
