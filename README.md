@@ -71,6 +71,12 @@ Scan the QR code with Expo Go app on your Android device.
 - **On screen:** footer shows `גרסה X`; on web it loads `X` from `/api/health` (Render server) after deploy.
 - **Bump:** `npm run version:bump -- 1.2.1` then commit, push, and redeploy.
 
+## Analytics (web / Render)
+
+- Persistent **player id** in `multiplication_table_player_id` (survives parent reset).
+- Postgres tables `MtPlayer`, `MtRegistration`, `MtVisit`; raw dump at `/db`.
+- Render setup: [docs/RENDER-DATABASE.md](docs/RENDER-DATABASE.md).
+
 ## App Logic
 
 ### Exercise Groups (1-4)

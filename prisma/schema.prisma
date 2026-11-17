@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model MtPlayer {
+  id            String           @id @default(cuid())
+  firstSeenAt   DateTime         @default(now())
+  lastSeenAt    DateTime         @default(now())
+  latestName    String?
+  latestGender  String?
+  registrations MtRegistration[]
+  visits        MtVisit[]
+}
+
+model MtRegistration {
+  id           String   @id @default(cuid())
+  playerId     String
+  name         String
+  gender       String
+  registeredAt DateTime @default(now())
+  player       MtPlayer @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([playerId, registeredAt])
+}
+
+model MtVisit {
+  id           String   @id @default(cuid())
+  playerId     String
+  visitedAt    DateTime @default(now())
+  visitKind    String
+  name         String?
+  gender       String?
+  group1Count  Int?
+  group2Count  Int?
+  group3Count  Int?
+  group4Count  Int?
+  appVersion   String?
+  sessionMs    Int?
+  player       MtPlayer @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([playerId, visitedAt])
+}

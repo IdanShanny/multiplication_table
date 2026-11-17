@@ -9,6 +9,7 @@ import { CharacterScreen } from './src/screens/CharacterScreen';
 import { AppData, User } from './src/types';
 import { loadAppData, saveUser, clearAllData } from './src/storage';
 import { FEATURE_CHARACTER } from './src/features';
+import { syncAnalyticsOnAppLoad, syncAnalyticsOnRegister } from './src/analytics';
 
 // Enable RTL for Hebrew
 I18nManager.allowRTL(true);
@@ -35,12 +36,14 @@ export default function App() {
     const data = await loadAppData();
     setAppData(data);
     setScreen(data.user ? 'practice' : 'registration');
+    void syncAnalyticsOnAppLoad(data);
   };
 
   const handleRegister = async (user: User) => {
     const data = await saveUser(user);
     setAppData(data);
     setScreen('practice');
+    void syncAnalyticsOnRegister(user, data);
   };
 
   const handleDataUpdate = (data: AppData) => {
