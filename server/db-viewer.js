@@ -1,5 +1,3 @@
-const MT_TABLE_PREFIX = 'Mt';
-
 function renderDbHtmlDocument(title, bodyHtml) {
   return `<!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -83,11 +81,43 @@ function registerDbViewerRoutes(app, prisma) {
   <h1>לוח הכפל — database (Mt tables)</h1>
   <p><a href="/">← Back to app</a></p>
   <p>Shared Postgres may also hold nifgashim tables; only <code>Mt*</code> tables are listed here.</p>
+  <p><strong>Reports:</strong> <a href="/db/MtVisit/players">All players (summary)</a></p>
   <ul>${items || '<li>(no Mt tables yet — run migrations)</li>'}</ul>`;
       res.type('html').send(renderDbHtmlDocument('Database tables', indexBody));
     } catch (err) {
       console.error('DB viewer index failed:', err);
       res.status(500).type('text/plain').send('Failed to list tables.\n');
+    }
+  });
+
+  app.get('/db/MtVisit/players', async (req, res) => {
+    try {
+      const players = await prisma.mtPlayer.findMany({
+        orderBy: { lastSeenAt: 'desc' },
+        select: { id: true, latestName: true, lastSeenAt: true },
+      });
+
+      const rowsHtml = players
+        .map((p) => {
+          const name = p.latestName ? escapeHtml(p.latestName) : '<em>(no name yet)</em>';
+          const last = p.lastSeenAt ? escapeHtml(p.lastSeenAt.toISOString()) : '—';
+          return `<tr><td><code>${escapeHtml(p.id)}</code></td><td>${name}</td><td>${last}</td></tr>`;
+        })
+        .join('');
+
+      const body = `
+  <p><a href="/db">← Database tables</a> · <a href="/db/MtVisit">MtVisit (raw)</a> · <a href="/">App</a></p>
+  <h1>All players</h1>
+  <p>Unique player id, last name used, last connection.</p>
+  <p>Total: ${players.length}</p>
+  <table>
+    <thead><tr><th>Player ID</th><th>Last name</th><th>Last connection (UTC)</th></tr></thead>
+    <tbody>${rowsHtml || '<tr><td colspan="3">(no players yet)</td></tr>'}</tbody>
+  </table>`;
+      res.type('html').send(renderDbHtmlDocument('All players', body));
+    } catch (err) {
+      console.error('DB players report failed:', err);
+      res.status(500).type('text/plain').send('Failed to load players report.\n');
     }
   });
 
@@ -100,8 +130,12 @@ function registerDbViewerRoutes(app, prisma) {
         res.status(404).type('text/plain').send('Table not found.\n');
         return;
       }
+      const extraLinks =
+        tableName === 'MtVisit'
+          ? ' · <a href="/db/MtVisit/players">All players (summary)</a>'
+          : '';
       const body = [
-        `<p><a href="/db">← Database tables</a> · <a href="/">App</a></p>`,
+        `<p><a href="/db">← Database tables</a> · <a href="/">App</a>${extraLinks}</p>`,
         `<pre>${escapeHtml(
           [`Table: ${tableName}`, `Rows: ${rows.length}`, '---', rowsToPlainText(rows)].join('\n'),
         )}</pre>`,
