@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -51,10 +51,9 @@ export const PracticeScreen: React.FC<Props> = ({
   onShowParentsGuide,
   onShowCharacter,
 }) => {
-  const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
+  const [exerciseRevision, setExerciseRevision] = useState(0);
   const [answer, setAnswer] = useState('');
   const [feedback, setFeedback] = useState<{ message: string; isCorrect: boolean; correctAnswerStr?: string } | null>(null);
-  const [startTime, setStartTime] = useState<number>(0);
   const [showingFeedback, setShowingFeedback] = useState(false);
   
   // Incentive states
@@ -79,11 +78,17 @@ export const PracticeScreen: React.FC<Props> = ({
   const isFirstLoad = useRef(true);
   const isSubmittingRef = useRef(false);
   const isExerciseTransitionRef = useRef(false);
+  /** Single source for question text and grading (avoids Android state/UI lag). */
+  const activeExerciseRef = useRef<Exercise | null>(null);
+  const questionStartTimeRef = useRef(0);
 
-  const commitExercise = (exercise: Exercise) => {
-    setCurrentExercise(exercise);
-    setStartTime(Date.now());
-  };
+  const revealExercise = useCallback((exercise: Exercise) => {
+    activeExerciseRef.current = exercise;
+    questionStartTimeRef.current = Date.now();
+    setExerciseRevision((n) => n + 1);
+  }, []);
+
+  const activeExercise = activeExerciseRef.current;
 
   useEffect(() => {
     // Force RTL on every component mount to prevent layout flipping
@@ -131,14 +136,14 @@ export const PracticeScreen: React.FC<Props> = ({
 
       if (loadGeneration !== practiceInitialLoadGeneration) return;
 
-      commitExercise(exercise);
+      revealExercise(exercise);
       isFirstLoad.current = false;
       await saveAppData(freshData);
       onDataUpdate(freshData);
     } catch (error) {
       console.error('Error loading first exercise:', error);
       if (loadGeneration !== practiceInitialLoadGeneration) return;
-      commitExercise({ a: 2, b: 3, group: 1 });
+      revealExercise({ a: 2, b: 3, group: 1 });
     }
   };
 
@@ -149,17 +154,16 @@ export const PracticeScreen: React.FC<Props> = ({
       const freshData = await loadAppData();
       if (transitionGeneration !== practiceExerciseTransitionGeneration) return;
 
-      const previous = currentExercise ?? undefined;
+      const previous = activeExerciseRef.current ?? undefined;
       const exercise = selectNextExercise(freshData, previous);
       updateWrongExerciseFlagsAfterPick(freshData, exercise);
 
       if (transitionGeneration !== practiceExerciseTransitionGeneration) return;
       await saveAppData(freshData);
 
-      const nativeDriver = Platform.OS !== 'web';
-      const showNextExercise = () => {
+      const finishReveal = () => {
         if (transitionGeneration !== practiceExerciseTransitionGeneration) return;
-        commitExercise(exercise);
+        revealExercise(exercise);
         setShowingFeedback(false);
         setFeedback(null);
         setAnswer('');
@@ -167,19 +171,15 @@ export const PracticeScreen: React.FC<Props> = ({
         getIncentiveData().then((incentiveData) => {
           setHasDoublePoints(incentiveData.nextQuestionDoublePoints);
         });
-        if (nativeDriver) {
-          Animated.timing(exerciseAnim, {
-            toValue: 1,
-            duration: 200,
-            useNativeDriver: true,
-          }).start(() => inputRef.current?.focus());
-        } else {
-          exerciseAnim.setValue(1);
-          inputRef.current?.focus();
-        }
+        inputRef.current?.focus();
       };
 
-      if (nativeDriver) {
+      const useFadeTransition = Platform.OS === 'ios';
+      if (useFadeTransition) {
+        const showNextExercise = () => {
+          finishReveal();
+          exerciseAnim.setValue(1);
+        };
         Animated.timing(exerciseAnim, {
           toValue: 0,
           duration: 150,
@@ -187,7 +187,7 @@ export const PracticeScreen: React.FC<Props> = ({
         }).start(showNextExercise);
       } else {
         exerciseAnim.setValue(1);
-        showNextExercise();
+        finishReveal();
       }
 
       onDataUpdate(freshData);
@@ -196,7 +196,7 @@ export const PracticeScreen: React.FC<Props> = ({
       if (transitionGeneration !== practiceExerciseTransitionGeneration) return;
       const randomA = Math.floor(Math.random() * 10) + 1;
       const randomB = Math.floor(Math.random() * 10) + 1;
-      commitExercise({ a: randomA, b: randomB, group: 3 });
+      revealExercise({ a: randomA, b: randomB, group: 3 });
       setAnswer('');
       setShowingFeedback(false);
       setFeedback(null);
@@ -205,7 +205,7 @@ export const PracticeScreen: React.FC<Props> = ({
   };
 
   const handleSubmit = async () => {
-    const exercise = currentExercise;
+    const exercise = activeExerciseRef.current;
     if (
       !exercise ||
       !answer.trim() ||
@@ -226,7 +226,7 @@ export const PracticeScreen: React.FC<Props> = ({
 
     const correctAnswer = exercise.a * exercise.b;
     const isCorrect = userAnswer === correctAnswer;
-    const responseTime = Date.now() - startTime;
+    const responseTime = Date.now() - questionStartTimeRef.current;
 
     const result: ExerciseResult = {
       a: exercise.a,
@@ -417,7 +417,7 @@ export const PracticeScreen: React.FC<Props> = ({
     selectNewExercise();
   };
 
-  if (!currentExercise) {
+  if (!activeExercise) {
   return (
     <LinearGradient colors={['#e74c3c', '#c0392b']} style={styles.container}>
       <Text style={styles.loadingText}>טוען...</Text>
@@ -493,8 +493,11 @@ export const PracticeScreen: React.FC<Props> = ({
             ]}
           >
             <View style={styles.exerciseContainer}>
-              <Text style={[styles.exerciseText, styles.ltr]}>
-                {currentExercise.a} × {currentExercise.b} = ?
+              <Text
+                key={`q-${activeExercise.a}-${activeExercise.b}-${exerciseRevision}`}
+                style={[styles.exerciseText, styles.ltr]}
+              >
+                {activeExercise.a} × {activeExercise.b} = ?
               </Text>
             </View>
 

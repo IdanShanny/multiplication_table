@@ -269,19 +269,18 @@ export const saveExerciseResult = async (result: ExerciseResult): Promise<void> 
   const exercise = data.exercises[key];
   
   if (exercise) {
-    if (!result.isCorrect || result.responseTime > 10000) {
-      // Wrong answer or slow response - increase group
+    if (!result.isCorrect) {
       if (exercise.group < 4) {
         exercise.group = (exercise.group + 1) as 1 | 2 | 3 | 4;
       }
-      // Set up to show this exercise again after the next one
       data.lastWrongExercise = { a: result.a, b: result.b };
-      data.showWrongExerciseNext = false; // Will be true after next exercise
-    } else {
-      // Correct and fast - decrease group
-      if (exercise.group > 1) {
-        exercise.group = (exercise.group - 1) as 1 | 2 | 3 | 4;
+      data.showWrongExerciseNext = false;
+    } else if (result.responseTime > 10000) {
+      if (exercise.group < 4) {
+        exercise.group = (exercise.group + 1) as 1 | 2 | 3 | 4;
       }
+    } else if (exercise.group > 1) {
+      exercise.group = (exercise.group - 1) as 1 | 2 | 3 | 4;
     }
   }
   
