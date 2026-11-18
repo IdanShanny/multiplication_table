@@ -37,8 +37,13 @@ export const AvatarShowcaseScreen: React.FC = () => {
     }
   };
 
+  const containerStyle =
+    Platform.OS === 'web'
+      ? [styles.container, { minHeight: typeof window !== 'undefined' ? window.innerHeight : 600 }]
+      : styles.container;
+
   return (
-    <LinearGradient colors={['#5b2c8f', '#8e44ad']} style={styles.container}>
+    <LinearGradient colors={['#5b2c8f', '#8e44ad']} style={containerStyle}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <Text style={styles.title}>תצוגת דמויות — כל העיצובים</Text>
         <Text style={styles.subtitle}>
@@ -94,6 +99,7 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: Platform.OS === 'web' ? 28 : 48,
     paddingBottom: 48,
+    flexGrow: 1,
   },
   title: {
     color: 'white',

@@ -7,7 +7,7 @@ import { ReportScreen } from './src/screens/ReportScreen';
 import { ParentsGuideScreen } from './src/screens/ParentsGuideScreen';
 import { CharacterScreen } from './src/screens/CharacterScreen';
 import { AvatarShowcaseScreen } from './src/screens/AvatarShowcaseScreen';
-import { isAvatarPreviewMode } from './src/avatar/previewMode';
+import { isAvatarPreviewMode, normalizeAvatarPreviewUrl } from './src/avatar/previewMode';
 import { AppData, User } from './src/types';
 import { loadAppData, saveUser, clearAllData } from './src/storage';
 import { FEATURE_CHARACTER } from './src/features';
@@ -33,7 +33,9 @@ export default function App() {
   const [appData, setAppData] = useState<AppData | null>(null);
 
   useEffect(() => {
+    normalizeAvatarPreviewUrl();
     if (isAvatarPreviewMode()) {
+      setScreen('avatarPreview');
       return;
     }
     loadInitialData();
@@ -48,6 +50,10 @@ export default function App() {
 
   const loadInitialData = async () => {
     const data = await loadAppData();
+    if (isAvatarPreviewMode()) {
+      setScreen('avatarPreview');
+      return;
+    }
     setAppData(data);
     setScreen(data.user ? 'practice' : 'registration');
     void syncAnalyticsOnAppLoad(data);

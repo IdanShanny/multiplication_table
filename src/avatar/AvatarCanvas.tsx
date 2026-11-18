@@ -110,19 +110,23 @@ export const AvatarCanvas: React.FC<Props> = ({ appearance, size = 200, playToke
     </Svg>
   );
 
+  const useMotion = !incomplete && !!gesture && playToken > 0;
+
+  const inner = useMotion ? (
+    <Animated.View
+      style={{
+        transform: [{ translateY }, { rotate }, { scale }],
+      }}
+    >
+      {svgBody}
+    </Animated.View>
+  ) : (
+    svgBody
+  );
+
   return (
     <View style={[styles.wrap, { width: size, height: size * 1.15 }]}>
-      <Animated.View
-        style={{
-          transform: [
-            { translateY },
-            { rotate },
-            { scale },
-          ],
-        }}
-      >
-        {svgBody}
-      </Animated.View>
+      {inner}
     </View>
   );
 };
