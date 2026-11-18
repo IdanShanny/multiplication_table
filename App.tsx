@@ -6,6 +6,8 @@ import { PracticeScreen } from './src/screens/PracticeScreen';
 import { ReportScreen } from './src/screens/ReportScreen';
 import { ParentsGuideScreen } from './src/screens/ParentsGuideScreen';
 import { CharacterScreen } from './src/screens/CharacterScreen';
+import { AvatarShowcaseScreen } from './src/screens/AvatarShowcaseScreen';
+import { isAvatarPreviewMode } from './src/avatar/previewMode';
 import { AppData, User } from './src/types';
 import { loadAppData, saveUser, clearAllData } from './src/storage';
 import { FEATURE_CHARACTER } from './src/features';
@@ -15,13 +17,25 @@ import { syncAnalyticsOnAppLoad, syncAnalyticsOnRegister } from './src/analytics
 I18nManager.allowRTL(true);
 I18nManager.forceRTL(true);
 
-type Screen = 'loading' | 'registration' | 'practice' | 'parentsGuide' | 'report' | 'character';
+type Screen =
+  | 'loading'
+  | 'registration'
+  | 'practice'
+  | 'parentsGuide'
+  | 'report'
+  | 'character'
+  | 'avatarPreview';
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>('loading');
+  const [screen, setScreen] = useState<Screen>(() =>
+    isAvatarPreviewMode() ? 'avatarPreview' : 'loading'
+  );
   const [appData, setAppData] = useState<AppData | null>(null);
 
   useEffect(() => {
+    if (isAvatarPreviewMode()) {
+      return;
+    }
     loadInitialData();
   }, []);
 
@@ -74,6 +88,14 @@ export default function App() {
     setAppData(data);
     setScreen('registration');
   };
+
+  if (screen === 'avatarPreview') {
+    return (
+      <AppShell>
+        <AvatarShowcaseScreen />
+      </AppShell>
+    );
+  }
 
   if (screen === 'loading' || !appData) {
     return (

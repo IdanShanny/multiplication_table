@@ -25,6 +25,10 @@ if (databaseUrl) {
   console.warn('DATABASE_URL is unset — analytics and /db are disabled.');
 }
 
+app.get('/preview/avatars', (req, res) => {
+  res.redirect(302, '/?avatarPreview=1');
+});
+
 app.use(express.static(DIST, { index: 'index.html' }));
 
 app.get(/.*/, (req, res) => {

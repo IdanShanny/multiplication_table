@@ -6,7 +6,6 @@ import {
   StyleSheet,
   ScrollView,
   Platform,
-  Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { User, CharacterStage, CompletedCharacter, CharacterColor, CharacterSkin, CharacterAnimation } from '../types';
@@ -20,6 +19,9 @@ import {
 } from '../storage';
 import { getThresholdForStage } from '../characterProgress';
 import { rtlHeaderRow, rtlText } from '../rtlStyles';
+import { AvatarCanvas } from '../avatar/AvatarCanvas';
+import { AvatarGestureLottie } from '../avatar/AvatarGestureLottie';
+import { appearanceFromStage } from '../avatar/catalog';
 
 interface Props {
   user: User;
@@ -28,67 +30,22 @@ interface Props {
 
 type SelectionMode = 'none' | 'color' | 'skin' | 'animation';
 
-function getCharacterVisualEmojis(
-  color?: CharacterColor,
-  skin?: CharacterSkin
-): { body: string; outfit: string } {
-  let body = '👤';
-  if (color) {
-    switch (color) {
-      case 'white':
-        body = '👱';
-        break;
-      case 'brown':
-        body = '👨🏾';
-        break;
-      case 'skin':
-        body = '👨';
-        break;
-    }
-  }
-  let outfit = '';
-  if (skin) {
-    switch (skin) {
-      case 'winter':
-        outfit = '🧥';
-        break;
-      case 'festive':
-        outfit = '🎩';
-        break;
-      case 'summer':
-        outfit = '👕';
-        break;
-    }
-  }
-  return { body, outfit };
-}
-
 export const CharacterScreen: React.FC<Props> = ({ user, onBack }) => {
   const [currentCharacter, setCurrentCharacter] = useState<CharacterStage>({ stage: 0 });
   const [completedCharacters, setCompletedCharacters] = useState<CompletedCharacter[]>([]);
   const [buildPoints, setBuildPoints] = useState(0);
   const [selectionMode, setSelectionMode] = useState<SelectionMode>('none');
   const [showCompletedList, setShowCompletedList] = useState(false);
-  const [animValue] = useState(new Animated.Value(0));
+  const [gesturePlayToken, setGesturePlayToken] = useState(0);
 
   useEffect(() => {
     loadData();
   }, []);
 
   useEffect(() => {
-    // Animate character when it changes
-    Animated.sequence([
-      Animated.timing(animValue, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animValue, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    if (currentCharacter.stage >= 3 && currentCharacter.animation) {
+      setGesturePlayToken((n) => n + 1);
+    }
   }, [currentCharacter]);
 
   const loadData = async () => {
@@ -174,47 +131,21 @@ export const CharacterScreen: React.FC<Props> = ({ user, onBack }) => {
   };
 
   const renderCharacter = () => {
-    const stage = currentCharacter.stage;
-    const color = stage >= 1 ? currentCharacter.color : undefined;
-    const skin = stage >= 2 ? currentCharacter.skin : undefined;
-    const { body: characterEmoji, outfit: skinEmoji } = getCharacterVisualEmojis(color, skin);
-
-    // Animation for stage 3+
-    const shouldAnimate = stage >= 3 && currentCharacter.animation;
-    const rotation = shouldAnimate ? animValue.interpolate({
-      inputRange: [0, 1],
-      outputRange: ['0deg', currentCharacter.animation === 'spin' ? '360deg' : '0deg'],
-    }) : '0deg';
-    
-    const isSmile = shouldAnimate && currentCharacter.animation === 'smile';
-    const scale = shouldAnimate
-      ? animValue.interpolate({
-          inputRange: [0, 0.5, 1],
-          outputRange: [
-            1,
-            currentCharacter.animation === 'jump' || isSmile ? 1.2 : 1,
-            1,
-          ],
-        })
-      : 1;
-
-    const smileOpacity = isSmile
-      ? animValue.interpolate({
-          inputRange: [0, 0.5, 1],
-          outputRange: [0.3, 1, 0.3],
-        })
-      : 0;
-
+    const appearance = appearanceFromStage(
+      currentCharacter.color,
+      currentCharacter.skin,
+      currentCharacter.animation,
+      currentCharacter.stage
+    );
     return (
-      <Animated.View style={[styles.characterDisplay, { transform: [{ rotate: rotation }, { scale }] }]}>
-        <Text style={styles.characterEmoji}>{characterEmoji}</Text>
-        {skinEmoji && <Text style={styles.skinEmoji}>{skinEmoji}</Text>}
-        {isSmile && (
-          <Animated.Text style={[styles.smileOverlay, { opacity: smileOpacity }]}>
-            😊
-          </Animated.Text>
-        )}
-      </Animated.View>
+      <View style={styles.characterDisplay}>
+        <AvatarCanvas appearance={appearance} size={160} playToken={gesturePlayToken} />
+        <AvatarGestureLottie
+          gesture={currentCharacter.animation}
+          playToken={gesturePlayToken}
+          size={100}
+        />
+      </View>
     );
   };
 
@@ -348,14 +279,10 @@ export const CharacterScreen: React.FC<Props> = ({ user, onBack }) => {
   };
 
   const renderCompletedCharacterPreview = (char: CompletedCharacter) => {
-    const { body, outfit } = getCharacterVisualEmojis(char.color, char.skin);
+    const appearance = appearanceFromStage(char.color, char.skin, char.animation, 3);
     return (
       <View style={styles.completedThumb}>
-        <Text style={styles.completedThumbBody}>{body}</Text>
-        {outfit ? <Text style={styles.completedThumbOutfit}>{outfit}</Text> : null}
-        {char.animation === 'smile' && (
-          <Text style={styles.completedThumbSmile}>😊</Text>
-        )}
+        <AvatarCanvas appearance={appearance} size={72} />
       </View>
     );
   };
@@ -492,19 +419,8 @@ const styles = StyleSheet.create({
   characterDisplay: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  characterEmoji: {
-    fontSize: 120,
-  },
-  skinEmoji: {
-    fontSize: 60,
-    marginTop: -30,
-  },
-  smileOverlay: {
-    fontSize: 48,
-    position: 'absolute',
-    bottom: 10,
-    right: 10,
+    position: 'relative',
+    minHeight: 200,
   },
   stageInfo: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -670,19 +586,6 @@ const styles = StyleSheet.create({
     padding: 4,
     borderWidth: 1,
     borderColor: '#e0e0e0',
-  },
-  completedThumbBody: {
-    fontSize: 40,
-  },
-  completedThumbOutfit: {
-    fontSize: 22,
-    marginTop: -16,
-  },
-  completedThumbSmile: {
-    fontSize: 18,
-    position: 'absolute',
-    bottom: 2,
-    left: 4,
   },
   completedCharacterText: {
     fontSize: 16,
