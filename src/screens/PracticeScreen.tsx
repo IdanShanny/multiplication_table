@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppData, Exercise, ExerciseResult, User, DELAY_THRESHOLD } from '../types';
-import { selectNextExercise } from '../exerciseLogic';
+import { selectNextExercise, updateWrongExerciseFlagsAfterPick } from '../exerciseLogic';
 import { rtlHeaderRow, rtlInput, rtlText } from '../rtlStyles';
 import {
   saveExerciseResult,
@@ -31,6 +31,10 @@ import {
 import { getCorrectMessages, getWrongMessages, getRandomMessage, getCorrectAnswerString } from '../messages';
 import { IncentivePopup } from '../components/IncentivePopup';
 import { hasCharacterUpgradeWaiting } from '../characterProgress';
+
+/** Cancels stale async loads when React remounts (Strict Mode) or overlaps transitions. */
+let practiceInitialLoadGeneration = 0;
+let practiceExerciseTransitionGeneration = 0;
 
 interface Props {
   user: User;
@@ -73,6 +77,13 @@ export const PracticeScreen: React.FC<Props> = ({
   const exerciseAnim = useRef(new Animated.Value(1)).current;
   const inputRef = useRef<TextInput>(null);
   const isFirstLoad = useRef(true);
+  const isSubmittingRef = useRef(false);
+  const isExerciseTransitionRef = useRef(false);
+
+  const commitExercise = (exercise: Exercise) => {
+    setCurrentExercise(exercise);
+    setStartTime(Date.now());
+  };
 
   useEffect(() => {
     // Force RTL on every component mount to prevent layout flipping
@@ -81,7 +92,8 @@ export const PracticeScreen: React.FC<Props> = ({
       I18nManager.forceRTL(true);
     }
     
-    loadFirstExercise();
+    const loadGeneration = ++practiceInitialLoadGeneration;
+    loadFirstExercise(loadGeneration);
     loadIncentiveData();
     loadCharacterBadge();
   }, []);
@@ -109,50 +121,49 @@ export const PracticeScreen: React.FC<Props> = ({
   };
 
   // Load first exercise immediately without animation
-  const loadFirstExercise = async () => {
+  const loadFirstExercise = async (loadGeneration: number) => {
     try {
       const freshData = await loadAppData();
+      if (loadGeneration !== practiceInitialLoadGeneration) return;
+
       const exercise = selectNextExercise(freshData, undefined);
-      
-      // Set exercise immediately on first load (no animation)
-      setCurrentExercise(exercise);
-      setStartTime(Date.now());
+      updateWrongExerciseFlagsAfterPick(freshData, exercise);
+
+      if (loadGeneration !== practiceInitialLoadGeneration) return;
+
+      commitExercise(exercise);
       isFirstLoad.current = false;
-      
-      // Update the flag for showing wrong exercise
-      if (freshData.lastWrongExercise) {
-        if (freshData.showWrongExerciseNext) {
-          freshData.lastWrongExercise = null;
-          freshData.showWrongExerciseNext = false;
-        } else {
-          freshData.showWrongExerciseNext = true;
-        }
-        await saveAppData(freshData);
-      }
-      
+      await saveAppData(freshData);
       onDataUpdate(freshData);
     } catch (error) {
       console.error('Error loading first exercise:', error);
-      // Fallback: create a simple exercise
-      setCurrentExercise({ a: 2, b: 3, group: 1 });
-      setStartTime(Date.now());
+      if (loadGeneration !== practiceInitialLoadGeneration) return;
+      commitExercise({ a: 2, b: 3, group: 1 });
     }
   };
 
   const selectNewExercise = async () => {
+    isExerciseTransitionRef.current = true;
+    const transitionGeneration = ++practiceExerciseTransitionGeneration;
     try {
       const freshData = await loadAppData();
-      const exercise = selectNextExercise(freshData, currentExercise || undefined);
-      
-      // Reset state immediately so input becomes editable
-      setShowingFeedback(false);
-      setFeedback(null);
-      
+      if (transitionGeneration !== practiceExerciseTransitionGeneration) return;
+
+      const previous = currentExercise ?? undefined;
+      const exercise = selectNextExercise(freshData, previous);
+      updateWrongExerciseFlagsAfterPick(freshData, exercise);
+
+      if (transitionGeneration !== practiceExerciseTransitionGeneration) return;
+      await saveAppData(freshData);
+
       const nativeDriver = Platform.OS !== 'web';
       const showNextExercise = () => {
-        setCurrentExercise(exercise);
-        setStartTime(Date.now());
+        if (transitionGeneration !== practiceExerciseTransitionGeneration) return;
+        commitExercise(exercise);
+        setShowingFeedback(false);
+        setFeedback(null);
         setAnswer('');
+        isExerciseTransitionRef.current = false;
         getIncentiveData().then((incentiveData) => {
           setHasDoublePoints(incentiveData.nextQuestionDoublePoints);
         });
@@ -178,45 +189,48 @@ export const PracticeScreen: React.FC<Props> = ({
         exerciseAnim.setValue(1);
         showNextExercise();
       }
-      
-      // Update the flag for showing wrong exercise
-      if (freshData.lastWrongExercise) {
-        if (freshData.showWrongExerciseNext) {
-          freshData.lastWrongExercise = null;
-          freshData.showWrongExerciseNext = false;
-        } else {
-          freshData.showWrongExerciseNext = true;
-        }
-        await saveAppData(freshData);
-      }
-      
+
       onDataUpdate(freshData);
     } catch (error) {
       console.error('Error selecting new exercise:', error);
-      // Don't get stuck - just pick a random exercise
+      if (transitionGeneration !== practiceExerciseTransitionGeneration) return;
       const randomA = Math.floor(Math.random() * 10) + 1;
       const randomB = Math.floor(Math.random() * 10) + 1;
-      setCurrentExercise({ a: randomA, b: randomB, group: 3 });
-      setStartTime(Date.now());
+      commitExercise({ a: randomA, b: randomB, group: 3 });
       setAnswer('');
       setShowingFeedback(false);
       setFeedback(null);
+      isExerciseTransitionRef.current = false;
     }
   };
 
   const handleSubmit = async () => {
-    if (!currentExercise || !answer.trim() || showingFeedback) return;
+    const exercise = currentExercise;
+    if (
+      !exercise ||
+      !answer.trim() ||
+      showingFeedback ||
+      isSubmittingRef.current ||
+      isExerciseTransitionRef.current
+    ) {
+      return;
+    }
 
+    isSubmittingRef.current = true;
+
+    try {
     const userAnswer = parseInt(answer, 10);
-    if (isNaN(userAnswer)) return;
+    if (isNaN(userAnswer)) {
+      return;
+    }
 
-    const correctAnswer = currentExercise.a * currentExercise.b;
+    const correctAnswer = exercise.a * exercise.b;
     const isCorrect = userAnswer === correctAnswer;
     const responseTime = Date.now() - startTime;
 
     const result: ExerciseResult = {
-      a: currentExercise.a,
-      b: currentExercise.b,
+      a: exercise.a,
+      b: exercise.b,
       userAnswer,
       correctAnswer,
       isCorrect,
@@ -309,12 +323,12 @@ export const PracticeScreen: React.FC<Props> = ({
       // Show regular feedback (for wrong answers or correct without incentive)
       const messages = isCorrect
         ? getCorrectMessages(user.name, user.gender)
-        : getWrongMessages(user.name, user.gender, currentExercise.a, currentExercise.b, correctAnswer);
+        : getWrongMessages(user.name, user.gender, exercise.a, exercise.b, correctAnswer);
       
       const message = getRandomMessage(messages);
       
       // For wrong answers, include the correct answer string for prominent display
-      const correctAnswerStr = isCorrect ? undefined : getCorrectAnswerString(currentExercise.a, currentExercise.b, correctAnswer);
+      const correctAnswerStr = isCorrect ? undefined : getCorrectAnswerString(exercise.a, exercise.b, correctAnswer);
       
       setFeedback({ message, isCorrect, correctAnswerStr });
       setShowingFeedback(true);
@@ -339,6 +353,9 @@ export const PracticeScreen: React.FC<Props> = ({
     }
 
     // No timeout - wait for user to click "Continue" button
+    } finally {
+      isSubmittingRef.current = false;
+    }
   };
 
   const showCharacterUnlockPopup = async (unlock: { stage: 0 | 1 | 2; threshold: number }) => {

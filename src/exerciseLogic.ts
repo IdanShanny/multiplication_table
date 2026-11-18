@@ -50,6 +50,26 @@ export const selectNextExercise = (
   return availableExercises[0] || exercises[0];
 };
 
+/** Update wrong-retry flags after the next exercise has been chosen (single writer). */
+export const updateWrongExerciseFlagsAfterPick = (
+  appData: AppData,
+  picked: Exercise
+): void => {
+  if (!appData.lastWrongExercise) return;
+
+  const isRetryPick =
+    appData.showWrongExerciseNext &&
+    appData.lastWrongExercise.a === picked.a &&
+    appData.lastWrongExercise.b === picked.b;
+
+  if (isRetryPick) {
+    appData.lastWrongExercise = null;
+    appData.showWrongExerciseNext = false;
+  } else if (!appData.showWrongExerciseNext) {
+    appData.showWrongExerciseNext = true;
+  }
+};
+
 export const getExercisesByGroup = (appData: AppData): Record<1 | 2 | 3 | 4, Exercise[]> => {
   const groups: Record<1 | 2 | 3 | 4, Exercise[]> = {
     1: [],
