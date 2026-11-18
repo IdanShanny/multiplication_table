@@ -55,7 +55,12 @@ export const AvatarCanvas: React.FC<Props> = ({ appearance, size = 200, playToke
   const mouthSmile = gesture === 'smile' && !incomplete;
 
   const svgBody = (
-    <Svg width={size} height={size * 1.15} viewBox="0 0 200 230">
+    <Svg
+      width={size}
+      height={size * 1.15}
+      viewBox="0 0 200 230"
+      accessibilityLabel="avatar"
+    >
       <Ellipse cx="100" cy="218" rx="55" ry="10" fill="rgba(0,0,0,0.12)" />
       <G>
         <Ellipse cx="62" cy="175" rx="14" ry="32" fill={incomplete ? '#999' : skinFill} />
@@ -82,7 +87,14 @@ export const AvatarCanvas: React.FC<Props> = ({ appearance, size = 200, playToke
           </>
         )}
 
-        <Circle cx="100" cy="72" r="44" fill={incomplete ? '#999' : skinFill} />
+        <Circle
+          cx="100"
+          cy="72"
+          r="44"
+          fill={incomplete ? '#999' : skinFill}
+          stroke="#4a3728"
+          strokeWidth={2}
+        />
 
         {outfit && appearance.outfit === 'festive' && (
           <>

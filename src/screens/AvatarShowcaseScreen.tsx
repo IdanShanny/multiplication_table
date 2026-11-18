@@ -50,9 +50,7 @@ export const AvatarShowcaseScreen: React.FC = () => {
           לחיצה על כרטיס מפעילה שוב את המחווה. אין צורך לשחק או לצבור נקודות.
         </Text>
         {Platform.OS === 'web' && (
-          <Text style={styles.hint}>
-            קישור ישיר: {avatarPreviewAppUrl()}
-          </Text>
+          <Text style={styles.hint}>קישור ישיר: {avatarPreviewAppUrl()}</Text>
         )}
 
         <View style={styles.grid}>
@@ -85,7 +83,9 @@ const ShowcaseCard: React.FC<{
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
       <View style={styles.cardInner}>
         <AvatarCanvas appearance={appearance} size={120} playToken={playToken} />
-        <AvatarGestureLottie gesture={appearance.gesture} playToken={playToken} size={90} />
+        {playToken > 0 && (
+          <AvatarGestureLottie gesture={appearance.gesture} playToken={playToken} size={72} />
+        )}
       </View>
       <Text style={styles.cardLabel}>{label}</Text>
       <Text style={styles.cardTap}>לחץ להפעלת מחווה</Text>

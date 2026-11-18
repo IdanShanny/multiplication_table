@@ -1,8 +1,11 @@
-import { Platform } from 'react-native';
+/** Browser client (works in mobile Safari/Chrome, not only when Platform.OS === 'web'). */
+function isBrowserClient(): boolean {
+  return typeof window !== 'undefined' && typeof document !== 'undefined';
+}
 
 /** Web-only character showroom (?avatarPreview=1 or /preview/avatars). */
 export function isAvatarPreviewMode(): boolean {
-  if (Platform.OS !== 'web' || typeof window === 'undefined') {
+  if (!isBrowserClient()) {
     return false;
   }
   const path = window.location.pathname.replace(/\/$/, '') || '/';
@@ -18,7 +21,7 @@ export function isAvatarPreviewMode(): boolean {
 }
 
 export function normalizeAvatarPreviewUrl(): void {
-  if (Platform.OS !== 'web' || typeof window === 'undefined') {
+  if (!isBrowserClient()) {
     return;
   }
   const path = window.location.pathname.replace(/\/$/, '') || '/';

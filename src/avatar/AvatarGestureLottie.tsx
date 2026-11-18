@@ -48,7 +48,7 @@ export const AvatarGestureLottie: React.FC<Props> = ({ gesture, playToken, size 
 const styles = StyleSheet.create({
   overlay: {
     position: 'absolute',
-    top: 0,
+    bottom: 4,
     alignSelf: 'center',
     zIndex: 2,
   },
