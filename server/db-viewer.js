@@ -90,7 +90,7 @@ function registerDbViewerRoutes(app, prisma) {
       res.type('html').send(renderDbHtmlDocument('Database tables', indexBody));
     } catch (err) {
       console.error('DB viewer index failed:', err);
-      res.status(500).type('text/plain').send('Failed to list tables.\n');
+      res.type('html').send(renderDbHtmlDocument('Database unavailable', '<p>Database is temporarily unreachable.</p><p><a href="/">← App</a></p>'));
     }
   });
 
@@ -121,7 +121,7 @@ function registerDbViewerRoutes(app, prisma) {
       res.type('html').send(renderDbHtmlDocument('All players', body));
     } catch (err) {
       console.error('DB players report failed:', err);
-      res.status(500).type('text/plain').send('Failed to load players report.\n');
+      res.type('html').send(renderDbHtmlDocument('Database unavailable', '<p>Database is temporarily unreachable.</p><p><a href="/db">← Database</a></p>'));
     }
   });
 
@@ -147,7 +147,7 @@ function registerDbViewerRoutes(app, prisma) {
       res.type('html').send(renderDbHtmlDocument(`Table: ${tableName}`, body));
     } catch (err) {
       console.error('DB viewer table failed:', err);
-      res.status(500).type('text/plain').send('Failed to load table.\n');
+      res.type('html').send(renderDbHtmlDocument('Database unavailable', '<p>Database is temporarily unreachable.</p><p><a href="/db">← Database</a></p>'));
     }
   });
 }

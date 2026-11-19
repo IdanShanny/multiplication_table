@@ -1,9 +1,20 @@
-function registerAnalyticsRoutes(app, prisma) {
-  app.post('/api/players/ensure', async (req, res) => {
-    try {
-      const clientPlayerId =
-        typeof req.body?.clientPlayerId === 'string' ? req.body.clientPlayerId.trim() : '';
+const crypto = require('crypto');
 
+function fallbackPlayerId(clientPlayerId) {
+  const trimmed = typeof clientPlayerId === 'string' ? clientPlayerId.trim() : '';
+  return trimmed || crypto.randomUUID();
+}
+
+function registerAnalyticsRoutes(app, prisma) {
+  if (!prisma) {
+    return;
+  }
+
+  app.post('/api/players/ensure', async (req, res) => {
+    const clientPlayerId =
+      typeof req.body?.clientPlayerId === 'string' ? req.body.clientPlayerId.trim() : '';
+
+    try {
       if (clientPlayerId) {
         const existing = await prisma.mtPlayer.findUnique({ where: { id: clientPlayerId } });
         if (existing) {
@@ -26,7 +37,7 @@ function registerAnalyticsRoutes(app, prisma) {
       res.json({ playerId: player.id, isNew: true });
     } catch (err) {
       console.error('POST /api/players/ensure failed:', err);
-      res.status(500).json({ error: 'ensure_failed' });
+      res.json({ playerId: fallbackPlayerId(clientPlayerId), isNew: true, dbSkipped: true });
     }
   });
 
@@ -43,7 +54,7 @@ function registerAnalyticsRoutes(app, prisma) {
 
       const player = await prisma.mtPlayer.findUnique({ where: { id: playerId } });
       if (!player) {
-        res.status(404).json({ error: 'player_not_found' });
+        res.json({ ok: true, dbSkipped: true });
         return;
       }
 
@@ -60,7 +71,7 @@ function registerAnalyticsRoutes(app, prisma) {
       res.json({ ok: true });
     } catch (err) {
       console.error('POST /api/registrations failed:', err);
-      res.status(500).json({ error: 'registration_failed' });
+      res.json({ ok: true, dbSkipped: true });
     }
   });
 
@@ -74,7 +85,7 @@ function registerAnalyticsRoutes(app, prisma) {
 
       const player = await prisma.mtPlayer.findUnique({ where: { id: playerId } });
       if (!player) {
-        res.status(404).json({ error: 'player_not_found' });
+        res.json({ ok: true, dbSkipped: true });
         return;
       }
 
@@ -83,7 +94,8 @@ function registerAnalyticsRoutes(app, prisma) {
       const gender =
         req.body?.gender === 'female' ? 'female' : req.body?.gender === 'male' ? 'male' : null;
 
-      const toInt = (v) => (typeof v === 'number' && Number.isFinite(v) ? Math.max(0, Math.floor(v)) : null);
+      const toInt = (v) =>
+        typeof v === 'number' && Number.isFinite(v) ? Math.max(0, Math.floor(v)) : null;
 
       const sessionMs =
         typeof req.body?.sessionMs === 'number' && req.body.sessionMs >= 0
@@ -123,7 +135,7 @@ function registerAnalyticsRoutes(app, prisma) {
       res.json({ ok: true });
     } catch (err) {
       console.error('POST /api/visits failed:', err);
-      res.status(500).json({ error: 'visit_failed' });
+      res.json({ ok: true, dbSkipped: true });
     }
   });
 }

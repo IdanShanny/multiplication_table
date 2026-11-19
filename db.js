@@ -1,5 +1,8 @@
-const { PrismaClient } = require('@prisma/client');
+let prisma = null;
 
-const prisma = new PrismaClient();
+if (process.env.DATABASE_URL) {
+  const { PrismaClient } = require('@prisma/client');
+  prisma = new PrismaClient();
+}
 
 module.exports = prisma;

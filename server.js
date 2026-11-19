@@ -14,11 +14,11 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true, version: VERSION });
 });
 
-const databaseUrl = process.env.DATABASE_URL;
-if (databaseUrl) {
-  const prisma = require('./db');
-  const { registerAnalyticsRoutes } = require('./server/analytics');
-  const { registerDbViewerRoutes } = require('./server/db-viewer');
+const prisma = require('./db');
+const { registerAnalyticsRoutes } = require('./server/analytics');
+const { registerDbViewerRoutes } = require('./server/db-viewer');
+
+if (prisma) {
   registerAnalyticsRoutes(app, prisma);
   registerDbViewerRoutes(app, prisma);
 } else {
